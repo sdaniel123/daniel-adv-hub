@@ -107,7 +107,7 @@ export default function ClienteDetalhesPage() {
         <Link 
           href="/clientes" 
           className="btn-secondary"
-          style={{ fontSize: '0.86rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+          style={{ fontSize: '0.86rem', display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
         >
           <ArrowLeft size={16} /> Voltar para Clientes
         </Link>

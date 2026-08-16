@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   Users, 
   Star, 
@@ -18,6 +19,7 @@ import FormClienteModal from '@/components/clientes/FormClienteModal';
 import { initialClientesData } from '@/lib/clientesStore';
 
 export default function ClientesPage() {
+  const router = useRouter();
   const [clientes, setClientes] = useState(initialClientesData);
   const [activeFilter, setActiveFilter] = useState('todos');
   const [searchTerm, setSearchTerm] = useState('');
@@ -247,7 +249,16 @@ export default function ClientesPage() {
               </thead>
               <tbody>
                 {filteredSortedClientes.map((cli) => (
-                  <tr key={cli.id} style={{ borderBottom: '1px solid #162035', transition: 'background-color 0.15s ease' }}>
+                  <tr 
+                    key={cli.id} 
+                    onClick={() => router.push(`/clientes/${cli.id}`)}
+                    style={{ 
+                      borderBottom: '1px solid #162035', 
+                      transition: 'background-color 0.15s ease',
+                      cursor: 'pointer'
+                    }}
+                    className="table-row-hover"
+                  >
                     <td style={{ padding: '16px 20px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {cli.prioritario && (

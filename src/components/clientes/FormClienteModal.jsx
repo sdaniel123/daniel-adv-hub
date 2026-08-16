@@ -452,141 +452,143 @@ export default function FormClienteModal({ isOpen, onClose, onSave, initialData 
             </div>
           )}
 
-          {/* Capacidade Civil / Incapacidade */}
-          <div style={{ backgroundColor: '#0B101D', border: '1px solid #1B263B', borderRadius: '10px', padding: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#FFFFFF' }}>
-                Capacidade Civil / Incapacidade
-              </h4>
-              <span className="badge-saas badge-primary">
-                {formData.incapacidade}
-              </span>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
-                Situação do Cliente
-              </label>
-              <select
-                value={formData.incapacidade}
-                onChange={(e) => handleChange('incapacidade', e.target.value)}
-                className="search-input-dark"
-                style={{ width: '100%', paddingLeft: '12px', cursor: 'pointer' }}
-              >
-                <option value="Capaz">Capaz (Padrão)</option>
-                <option value="Menor Impúbere">Menor Impúbere / Relativamente Incapaz</option>
-                <option value="Curatelado">Curatelado (Interditado)</option>
-                <option value="Tutelado">Tutelado</option>
-              </select>
-            </div>
-
-            {/* Se Incapaz: Libera Seção do Responsável Legal */}
-            {formData.incapacidade !== 'Capaz' && (
-              <div style={{ marginTop: '16px', borderTop: '1px dashed #1B263B', paddingTop: '14px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <h5 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F59E0B', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <ShieldAlert size={15} /> Dados do Responsável Legal ({formData.incapacidade})
-                  </h5>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#94A3B8', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      checked={formData.copiarEnderecoCliente}
-                      onChange={handleCopiarEndereco}
-                    />
-                    Copiar endereço do cliente
-                  </label>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
-                  <div style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
-                      Nome Completo do Responsável *
-                    </label>
-                    <input
-                      type="text"
-                      required={formData.incapacidade !== 'Capaz'}
-                      placeholder="Nome do representante legal..."
-                      value={formData.respLegalNome}
-                      onChange={(e) => handleChange('respLegalNome', e.target.value)}
-                      className="search-input-dark"
-                      style={{ paddingLeft: '12px' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
-                      CPF do Responsável *
-                    </label>
-                    <input
-                      type="text"
-                      required={formData.incapacidade !== 'Capaz'}
-                      placeholder="000.000.000-00"
-                      value={formData.respLegalCpf}
-                      onChange={(e) => handleChange('respLegalCpf', maskCpfCnpj(e.target.value))}
-                      className="search-input-dark"
-                      style={{ paddingLeft: '12px' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
-                      RG do Responsável
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="RG do representante"
-                      value={formData.respLegalRg}
-                      onChange={(e) => handleChange('respLegalRg', e.target.value)}
-                      className="search-input-dark"
-                      style={{ paddingLeft: '12px' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
-                      Profissão do Responsável
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Profissão"
-                      value={formData.respLegalProfissao}
-                      onChange={(e) => handleChange('respLegalProfissao', e.target.value)}
-                      className="search-input-dark"
-                      style={{ paddingLeft: '12px' }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
-                      Nacionalidade
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Brasileiro(a)"
-                      value={formData.respLegalNacionalidade}
-                      onChange={(e) => handleChange('respLegalNacionalidade', e.target.value)}
-                      className="search-input-dark"
-                      style={{ paddingLeft: '12px' }}
-                    />
-                  </div>
-
-                  <div style={{ gridColumn: 'span 2' }}>
-                    <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
-                      Endereço do Responsável Legal
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Endereço residencial do responsável..."
-                      value={formData.respLegalEndereco}
-                      onChange={(e) => handleChange('respLegalEndereco', e.target.value)}
-                      className="search-input-dark"
-                      style={{ paddingLeft: '12px' }}
-                    />
-                  </div>
-                </div>
+          {/* Capacidade Civil / Incapacidade (Apenas para Pessoa Física) */}
+          {formData.tipo === 'Pessoa Física' && (
+            <div style={{ backgroundColor: '#0B101D', border: '1px solid #1B263B', borderRadius: '10px', padding: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#FFFFFF' }}>
+                  Capacidade Civil / Incapacidade
+                </h4>
+                <span className="badge-saas badge-primary">
+                  {formData.incapacidade}
+                </span>
               </div>
-            )}
-          </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
+                  Situação do Cliente
+                </label>
+                <select
+                  value={formData.incapacidade}
+                  onChange={(e) => handleChange('incapacidade', e.target.value)}
+                  className="search-input-dark"
+                  style={{ width: '100%', paddingLeft: '12px', cursor: 'pointer' }}
+                >
+                  <option value="Capaz">Capaz (Padrão)</option>
+                  <option value="Menor Impúbere">Menor Impúbere / Relativamente Incapaz</option>
+                  <option value="Curatelado">Curatelado (Interditado)</option>
+                  <option value="Tutelado">Tutelado</option>
+                </select>
+              </div>
+
+              {/* Se Incapaz: Libera Seção do Responsável Legal */}
+              {formData.incapacidade !== 'Capaz' && (
+                <div style={{ marginTop: '16px', borderTop: '1px dashed #1B263B', paddingTop: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                    <h5 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F59E0B', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <ShieldAlert size={15} /> Dados do Responsável Legal ({formData.incapacidade})
+                    </h5>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.78rem', color: '#94A3B8', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={formData.copiarEnderecoCliente}
+                        onChange={handleCopiarEndereco}
+                      />
+                      Copiar endereço do cliente
+                    </label>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
+                        Nome Completo do Responsável *
+                      </label>
+                      <input
+                        type="text"
+                        required={formData.incapacidade !== 'Capaz'}
+                        placeholder="Nome do representante legal..."
+                        value={formData.respLegalNome}
+                        onChange={(e) => handleChange('respLegalNome', e.target.value)}
+                        className="search-input-dark"
+                        style={{ paddingLeft: '12px' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
+                        CPF do Responsável *
+                      </label>
+                      <input
+                        type="text"
+                        required={formData.incapacidade !== 'Capaz'}
+                        placeholder="000.000.000-00"
+                        value={formData.respLegalCpf}
+                        onChange={(e) => handleChange('respLegalCpf', maskCpfCnpj(e.target.value))}
+                        className="search-input-dark"
+                        style={{ paddingLeft: '12px' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
+                        RG do Responsável
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="RG do representante"
+                        value={formData.respLegalRg}
+                        onChange={(e) => handleChange('respLegalRg', e.target.value)}
+                        className="search-input-dark"
+                        style={{ paddingLeft: '12px' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
+                        Profissão do Responsável
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Profissão"
+                        value={formData.respLegalProfissao}
+                        onChange={(e) => handleChange('respLegalProfissao', e.target.value)}
+                        className="search-input-dark"
+                        style={{ paddingLeft: '12px' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
+                        Nacionalidade
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Brasileiro(a)"
+                        value={formData.respLegalNacionalidade}
+                        onChange={(e) => handleChange('respLegalNacionalidade', e.target.value)}
+                        className="search-input-dark"
+                        style={{ paddingLeft: '12px' }}
+                      />
+                    </div>
+
+                    <div style={{ gridColumn: 'span 2' }}>
+                      <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#94A3B8', marginBottom: '4px' }}>
+                        Endereço do Responsável Legal
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Endereço residencial do responsável..."
+                        value={formData.respLegalEndereco}
+                        onChange={(e) => handleChange('respLegalEndereco', e.target.value)}
+                        className="search-input-dark"
+                        style={{ paddingLeft: '12px' }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Contato & Informações Finais */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
