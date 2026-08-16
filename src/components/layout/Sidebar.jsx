@@ -8,12 +8,9 @@ import {
   Users, 
   Briefcase, 
   CheckSquare, 
-  Gavel, 
   Calendar, 
+  DollarSign, 
   FileText, 
-  FolderKanban, 
-  Grid, 
-  BarChart3, 
   Settings, 
   LogOut 
 } from 'lucide-react';
@@ -22,13 +19,10 @@ const menuItems = [
   { label: 'Painel', href: '/', icon: LayoutDashboard },
   { label: 'Clientes', href: '/clientes', icon: Users },
   { label: 'Processos', href: '/processos', icon: Briefcase },
-  { label: 'Tarefas', href: '/prazos', icon: CheckSquare },
-  { label: 'Audiências', href: '/agenda', icon: Gavel },
+  { label: 'Tarefas e Prazos', href: '/prazos', icon: CheckSquare },
   { label: 'Agenda', href: '/agenda', icon: Calendar },
-  { label: 'Publicações', href: '/documentos', icon: FileText },
-  { label: 'Modelos', href: '/documentos', icon: FolderKanban },
-  { label: 'Aplicações', href: '/financeiro', icon: Grid },
-  { label: 'Relatórios', href: '/relatorios', icon: BarChart3 },
+  { label: 'Financeiro', href: '/financeiro', icon: DollarSign },
+  { label: 'Documentos', href: '/documentos', icon: FileText },
   { label: 'Gestão', href: '/perfil', icon: Settings },
 ];
 

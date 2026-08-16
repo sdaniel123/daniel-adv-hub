@@ -2,21 +2,12 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Menu, Search, Bell, Moon, Sun, User, Command } from 'lucide-react';
+import { Search, Bell, Moon, Sun, User, Command } from 'lucide-react';
 
-export default function Header({ onToggleSidebar, isDarkMode, onToggleTheme, onToggleNotifications, unreadCount = 3 }) {
+export default function Header({ isDarkMode, onToggleTheme, onToggleNotifications, unreadCount = 3 }) {
   return (
     <header className="header-main">
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <button
-          type="button"
-          onClick={onToggleSidebar}
-          style={{ padding: '6px', borderRadius: '8px', color: 'var(--text-main)' }}
-          aria-label="Alternar barra lateral"
-        >
-          <Menu size={20} />
-        </button>
-
         <div style={{ position: 'relative', width: '340px', display: 'flex', alignItems: 'center' }}>
           <Search size={15} style={{ position: 'absolute', left: '14px', color: 'var(--text-muted)' }} />
           <input
