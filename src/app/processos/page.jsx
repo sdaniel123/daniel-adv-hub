@@ -1,97 +1,137 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   Briefcase, 
   FileText, 
-  Star, 
   CheckCircle2, 
   Search, 
   Download, 
   Plus, 
-  X, 
   Gavel, 
   Calendar, 
   User, 
-  AlertCircle 
+  AlertCircle,
+  Archive
 } from 'lucide-react';
 import ToastNotification from '@/components/ui/ToastNotification';
-
-const mockProcessos = [
-  { id: '1', cnj: '0001234-56.2026.8.26.0100', cliente: 'Carlos Eduardo Silva', assunto: 'Ação de Cobrança c/c Indenização', sistema: 'PJe', vara: '2ª Vara Cível - Foro Central', status: 'Em andamento', comAudiencia: true, prioritario: true, encerado: false, arquivado: false },
-  { id: '2', cnj: '0098765-43.2025.8.26.0000', cliente: 'Tech Solutions Ltda', assunto: 'Recurso de Apelação Cível', sistema: 'EProc', vara: '3ª Câmara de Direito Privado', status: 'Em andamento', comAudiencia: false, prioritario: false, encerado: false, arquivado: false },
-  { id: '3', cnj: '0004321-12.2024.8.16.0014', cliente: 'Maria Fernanda Oliveira', assunto: 'Revisão Contratual Bancária', sistema: 'Projudi', vara: '1ª Vara Cível de Londrina', status: 'Encerrados', comAudiencia: false, prioritario: true, encerado: true, arquivado: false },
-];
+import FormProcessoModal from '@/components/processos/FormProcessoModal';
+import { initialProcessosData } from '@/lib/processosStore';
 
 export default function ProcessosPage() {
-  const [activeTab, setActiveTab] = useState('em_andamento');
+  const router = useRouter();
+  const [processos, setProcessos] = useState(initialProcessosData);
+  const [activeTab, setActiveTab] = useState('em_andamento'); // 'em_andamento' | 'com_audiencia' | 'encerrados' | 'arquivados'
   const [activeSystemFilter, setActiveSystemFilter] = useState('todos');
   const [searchTerm, setSearchTerm] = useState('');
-  const [showModal, setShowModal] = useState(false);
+  
+  // Modal state
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [editingProcesso, setEditingProcesso] = useState(null);
   const [toast, setToast] = useState(null);
 
-  // Form states
-  const [cnjInput, setCnjInput] = useState('');
-  const [clienteInput, setClienteInput] = useState('');
-  const [assuntoInput, setAssuntoInput] = useState('');
+  // Sorting: Most recent protocol date to oldest + Strict filtering
+  const filteredSortedProcessos = useMemo(() => {
+    return processos
+      .filter((proc) => {
+        const term = searchTerm.toLowerCase().trim();
+        
+        // Search by CNJ number or Client Name
+        const clientNames = (proc.clientes || []).map(c => c.nome.toLowerCase()).join(' ');
+        const matchesSearch = 
+          !term ||
+          proc.cnj.toLowerCase().includes(term) ||
+          clientNames.includes(term) ||
+          proc.assunto.toLowerCase().includes(term) ||
+          proc.tramitacao.toLowerCase().includes(term);
 
-  const filteredProcessos = mockProcessos.filter((proc) => {
-    const term = searchTerm.toLowerCase();
-    const matchesSearch = 
-      proc.cnj.toLowerCase().includes(term) ||
-      proc.cliente.toLowerCase().includes(term) ||
-      proc.assunto.toLowerCase().includes(term) ||
-      proc.vara.toLowerCase().includes(term) ||
-      proc.sistema.toLowerCase().includes(term);
+        if (!matchesSearch) return false;
 
-    if (!matchesSearch) return false;
+        // Strict Arquivados Rule: Archived processes ONLY appear in 'arquivados' tab!
+        if (activeTab === 'arquivados') {
+          if (!proc.arquivado && proc.status !== 'Arquivado') return false;
+        } else {
+          // If in any other tab (em_andamento, com_audiencia, encerrados), exclude archived!
+          if (proc.arquivado || proc.status === 'Arquivado') return false;
 
-    // Filter by Tab state
-    if (activeTab === 'em_andamento' && proc.status !== 'Em andamento') return false;
-    if (activeTab === 'com_audiencia' && !proc.comAudiencia) return false;
-    if (activeTab === 'encerrados' && !proc.encerado) return false;
-    if (activeTab === 'arquivados' && !proc.arquivado) return false;
+          if (activeTab === 'em_andamento' && proc.status !== 'Em andamento') return false;
+          if (activeTab === 'com_audiencia' && !proc.comAudiencia) return false;
+          if (activeTab === 'encerrados' && !proc.encerado && proc.status !== 'Encerrado') return false;
+        }
 
-    // Filter by System tag
-    if (activeSystemFilter === 'pje' && proc.sistema !== 'PJe') return false;
-    if (activeSystemFilter === 'projudi' && proc.sistema !== 'Projudi') return false;
-    if (activeSystemFilter === 'eproc' && proc.sistema !== 'EProc') return false;
-    if (activeSystemFilter === 'prioritarios' && !proc.prioritario) return false;
+        // Filter by System tag
+        if (activeSystemFilter === 'pje' && proc.sistema !== 'PJe') return false;
+        if (activeSystemFilter === 'projudi' && proc.sistema !== 'Projudi') return false;
+        if (activeSystemFilter === 'eproc' && proc.sistema !== 'EProc') return false;
+        if (activeSystemFilter === 'prioritarios' && !proc.prioritario) return false;
 
-    return true;
-  });
+        return true;
+      })
+      .sort((a, b) => {
+        // Order by protocol date descending (newest to oldest)
+        const dateA = a.dataProtocolo || '1970-01-01';
+        const dateB = b.dataProtocolo || '1970-01-01';
+        return dateB.localeCompare(dateA);
+      });
+  }, [processos, searchTerm, activeTab, activeSystemFilter]);
+
+  const handleOpenCreateModal = () => {
+    setEditingProcesso(null);
+    setShowFormModal(true);
+  };
+
+  const handleSaveProcesso = (formData) => {
+    const newId = formData.id || String(Date.now());
+    const newProcess = {
+      ...formData,
+      id: newId,
+      dataCadastro: new Date().toLocaleDateString('pt-BR'),
+      andamentos: formData.andamentos || [
+        { id: String(Date.now()), data: new Date().toLocaleDateString('pt-BR'), descricao: 'Cadastro inicial do processo no sistema.' }
+      ]
+    };
+
+    setProcessos((prev) => {
+      const exists = prev.some((p) => p.id === newId);
+      if (exists) {
+        return prev.map((p) => (p.id === newId ? newProcess : p));
+      }
+      return [newProcess, ...prev];
+    });
+
+    setToast(`Processo ${formData.cnj} salvo com sucesso!`);
+    setShowFormModal(false);
+  };
 
   const handleExportCSV = () => {
-    const headers = 'CNJ,Cliente,Assunto,Sistema,Vara,Status\n';
-    const rows = filteredProcessos.map(p => `"${p.cnj}","${p.cliente}","${p.assunto}","${p.sistema}","${p.vara}","${p.status}"`).join('\n');
+    const headers = 'CNJ,Clientes,Assunto,Sistema,Tramitação,Status,Prioritario,DataProtocolo\n';
+    const rows = filteredSortedProcessos.map(p => {
+      const cliNames = (p.clientes || []).map(c => c.nome).join('; ');
+      return `"${p.cnj}","${cliNames}","${p.assunto}","${p.sistema}","${p.tramitacao}","${p.status}",${p.prioritario ? 'Sim' : 'Não'},"${p.dataProtocoloFmt || ''}"`;
+    }).join('\n');
+
     const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `processos_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `relatorio_processos_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    setToast('Relatório de Processos exportado em CSV com sucesso!');
+    setToast('Relatório de Processos em CSV exportado com sucesso!');
   };
 
-  const handleAddProcesso = (e) => {
-    e.preventDefault();
-    setToast(`Processo ${cnjInput || 'Novo'} cadastrado com sucesso!`);
-    setShowModal(false);
-    setCnjInput('');
-    setClienteInput('');
-    setAssuntoInput('');
-  };
-
-  const totalEmAndamento = mockProcessos.filter(p => p.status === 'Em andamento').length;
-  const totalJudiciais = mockProcessos.length;
-  const totalPrioritarios = mockProcessos.filter(p => p.prioritario).length;
-  const totalEncerrados = mockProcessos.filter(p => p.encerado).length;
+  // Stat Card Metrics
+  const totalEmAndamento = processos.filter(p => !p.arquivado && p.status === 'Em andamento').length;
+  const totalJudiciais = processos.filter(p => !p.arquivado).length;
+  const totalPrioritarios = processos.filter(p => !p.arquivado && p.prioritario).length;
+  const totalArquivados = processos.filter(p => p.arquivado || p.status === 'Arquivado').length;
 
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-      {/* Header section */}
+      {/* Header section with Title & Action Buttons */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <span className="page-header-subtitle">DANIEL ADV HUB</span>
@@ -103,16 +143,15 @@ export default function ProcessosPage() {
             <Download size={15} />
             <span>Exportar CSV</span>
           </button>
-          <button type="button" className="btn-primary" onClick={() => setShowModal(true)}>
+          <button type="button" className="btn-primary" onClick={handleOpenCreateModal}>
             <Plus size={15} />
             <span>Novo processo</span>
           </button>
         </div>
       </div>
 
-      {/* 4 Stat Cards (No procedures!) */}
+      {/* 4 Stat Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        {/* Card 1: Processos em Andamento */}
         <div className="card-saas">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
@@ -127,11 +166,10 @@ export default function ProcessosPage() {
           </div>
         </div>
 
-        {/* Card 2: Processos Judiciais */}
         <div className="card-saas">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <span style={{ fontSize: '0.82rem', color: '#94A3B8', fontWeight: 500 }}>Processos Judiciais</span>
+              <span style={{ fontSize: '0.82rem', color: '#94A3B8', fontWeight: 500 }}>Processos Ativos</span>
               <div style={{ fontSize: '2rem', fontWeight: 800, color: '#3B82F6', marginTop: '4px' }}>
                 {totalJudiciais}
               </div>
@@ -142,7 +180,6 @@ export default function ProcessosPage() {
           </div>
         </div>
 
-        {/* Card 3: Processos Prioritários */}
         <div className="card-saas">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
@@ -152,22 +189,21 @@ export default function ProcessosPage() {
               </div>
             </div>
             <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#131D33', color: '#F59E0B' }}>
-              <Star size={18} />
+              <AlertCircle size={18} />
             </div>
           </div>
         </div>
 
-        {/* Card 4: Processos Encerrados */}
         <div className="card-saas">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <span style={{ fontSize: '0.82rem', color: '#94A3B8', fontWeight: 500 }}>Processos Encerrados</span>
-              <div style={{ fontSize: '2rem', fontWeight: 800, color: '#10B981', marginTop: '4px' }}>
-                {totalEncerrados}
+              <span style={{ fontSize: '0.82rem', color: '#94A3B8', fontWeight: 500 }}>Processos Arquivados</span>
+              <div style={{ fontSize: '2rem', fontWeight: 800, color: '#64748B', marginTop: '4px' }}>
+                {totalArquivados}
               </div>
             </div>
-            <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#131D33', color: '#10B981' }}>
-              <CheckCircle2 size={18} />
+            <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#131D33', color: '#64748B' }}>
+              <Archive size={18} />
             </div>
           </div>
         </div>
@@ -201,17 +237,17 @@ export default function ProcessosPage() {
           className={`tab-nav-btn ${activeTab === 'arquivados' ? 'active' : ''}`}
           onClick={() => setActiveTab('arquivados')}
         >
-          Arquivados
+          Arquivados ({totalArquivados})
         </button>
       </div>
 
-      {/* Filter & Search Bar */}
+      {/* Filter & Search Bar (Número CNJ ou Cliente) */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px', marginBottom: '20px' }}>
         <div style={{ position: 'relative', width: '420px', maxWidth: '100%' }}>
           <Search size={15} style={{ position: 'absolute', left: '12px', top: '10px', color: '#94A3B8' }} />
           <input
             type="text"
-            placeholder="Buscar por número CNJ, cliente, assunto, vara ou sistema..."
+            placeholder="Buscar por número CNJ ou nome do cliente..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input-dark"
@@ -224,14 +260,7 @@ export default function ProcessosPage() {
             className={`pill-filter ${activeSystemFilter === 'todos' ? 'active' : ''}`}
             onClick={() => setActiveSystemFilter('todos')}
           >
-            Todos
-          </button>
-          <button
-            type="button"
-            className={`pill-filter ${activeSystemFilter === 'processos' ? 'active' : ''}`}
-            onClick={() => setActiveSystemFilter('processos')}
-          >
-            Processos
+            Todos os Sistemas
           </button>
           <button
             type="button"
@@ -264,61 +293,96 @@ export default function ProcessosPage() {
         </div>
       </div>
 
-      {/* Main Table / Empty State Area */}
-      <div className="card-saas" style={{ padding: filteredProcessos.length === 0 ? '60px 20px' : '0', overflow: 'hidden' }}>
-        {filteredProcessos.length === 0 ? (
+      {/* Main Table Container (Clickable Rows) */}
+      <div className="card-saas" style={{ padding: filteredSortedProcessos.length === 0 ? '60px 20px' : '0', overflow: 'hidden' }}>
+        {filteredSortedProcessos.length === 0 ? (
           <div style={{ textAlign: 'center', color: '#94A3B8', fontSize: '0.88rem' }}>
-            Nenhum processo encontrado com os filtros selecionados.
+            Nenhum processo encontrado para a pesquisa ou filtro informado.
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.86rem' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #1B263B', color: '#94A3B8', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  <th style={{ padding: '16px 20px' }}>Número CNJ</th>
-                  <th style={{ padding: '16px 20px' }}>Cliente / Parte</th>
-                  <th style={{ padding: '16px 20px' }}>Assunto</th>
-                  <th style={{ padding: '16px 20px' }}>Vara / Sistema</th>
+                  <th style={{ padding: '16px 20px' }}>Número CNJ / Protocolo</th>
+                  <th style={{ padding: '16px 20px' }}>Cliente(s) Vinculado(s)</th>
                   <th style={{ padding: '16px 20px' }}>Status</th>
+                  <th style={{ padding: '16px 20px' }}>Tramitação (Vara/Comarca)</th>
                   <th style={{ padding: '16px 20px', textAlign: 'right' }}>Ação</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredProcessos.map((proc) => (
-                  <tr key={proc.id} style={{ borderBottom: '1px solid #162035', transition: 'background-color 0.15s ease' }}>
+                {filteredSortedProcessos.map((proc) => (
+                  <tr 
+                    key={proc.id} 
+                    onClick={() => router.push(`/processos/${proc.id}`)}
+                    style={{ 
+                      borderBottom: '1px solid #162035', 
+                      transition: 'background-color 0.15s ease',
+                      cursor: 'pointer' 
+                    }}
+                    className="table-row-hover"
+                  >
+                    {/* Número CNJ & Exclamação Amarela de Prioridade */}
                     <td style={{ padding: '16px 20px' }}>
-                      <div style={{ fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace' }}>{proc.cnj}</div>
-                      {proc.prioritario && (
-                        <span className="badge-saas badge-warning" style={{ marginTop: '4px' }}>
-                          <Star size={10} /> Prioritário
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {proc.prioritario && (
+                          <AlertCircle size={16} color="#F59E0B" title="Processo Prioritário" />
+                        )}
+                        <span style={{ fontWeight: 700, color: '#FFFFFF', fontFamily: 'monospace', fontSize: '0.9rem' }}>
+                          {proc.cnj}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '4px' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#94A3B8' }}>{proc.assunto}</span>
+                        {proc.dataProtocoloFmt && (
+                          <span style={{ fontSize: '0.70rem', color: '#3B82F6', fontWeight: 600 }}>• Protocolo: {proc.dataProtocoloFmt}</span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Cliente(s) Vinculado(s) */}
+                    <td style={{ padding: '16px 20px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                        {proc.clientes && proc.clientes.length > 0 ? (
+                          proc.clientes.map((c) => (
+                            <Link
+                              key={c.id || c.nome}
+                              href={`/clientes/${c.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ color: '#FFFFFF', fontWeight: 600, fontSize: '0.84rem', textDecoration: 'underline' }}
+                            >
+                              {c.nome}
+                            </Link>
+                          ))
+                        ) : (
+                          <span style={{ color: '#94A3B8' }}>-</span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* Status */}
+                    <td style={{ padding: '16px 20px' }}>
+                      <span className={`badge-saas ${proc.arquivado ? 'badge-warning' : 'badge-primary'}`}>
+                        {proc.status}
+                      </span>
+                      {proc.sistema && (
+                        <span className="badge-saas badge-secondary" style={{ marginLeft: '6px' }}>
+                          {proc.sistema}
                         </span>
                       )}
                     </td>
-                    <td style={{ padding: '16px 20px', color: '#FFFFFF', fontWeight: 600 }}>
-                      {proc.cliente}
-                    </td>
+
+                    {/* Tramitação */}
                     <td style={{ padding: '16px 20px', color: '#94A3B8' }}>
-                      {proc.assunto}
+                      {proc.tramitacao || '-'}
                     </td>
-                    <td style={{ padding: '16px 20px' }}>
-                      <div style={{ color: '#FFFFFF' }}>{proc.vara}</div>
-                      <span className="badge-saas badge-primary" style={{ marginTop: '4px' }}>
-                        {proc.sistema}
-                      </span>
-                    </td>
-                    <td style={{ padding: '16px 20px' }}>
-                      <span className={`badge-saas ${proc.encerado ? 'badge-success' : 'badge-primary'}`}>
-                        {proc.status}
-                      </span>
-                    </td>
+
+                    {/* Action */}
                     <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                      <button
-                        type="button"
-                        style={{ color: '#3B82F6', fontWeight: 600, fontSize: '0.82rem' }}
-                        onClick={() => setToast(`Abrindo detalhes do processo ${proc.cnj}...`)}
-                      >
+                      <span style={{ color: '#3B82F6', fontWeight: 600, fontSize: '0.82rem' }}>
                         Ver autos →
-                      </button>
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -328,62 +392,13 @@ export default function ProcessosPage() {
         )}
       </div>
 
-      {/* Modal Novo Processo */}
-      {showModal && (
-        <div className="sidebar-overlay open" onClick={() => setShowModal(false)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="card-saas" onClick={(e) => e.stopPropagation()} style={{ width: '90%', maxWidth: '460px', margin: 0 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#FFFFFF' }}>Novo Processo</h3>
-              <button type="button" onClick={() => setShowModal(false)} style={{ color: '#94A3B8' }}><X size={18} /></button>
-            </div>
-
-            <form onSubmit={handleAddProcesso} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', color: '#94A3B8' }}>Número CNJ</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="0000000-00.2026.8.26.0000"
-                  value={cnjInput}
-                  onChange={(e) => setCnjInput(e.target.value)}
-                  className="search-input-dark"
-                  style={{ paddingLeft: '12px' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', color: '#94A3B8' }}>Cliente</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Nome do cliente..."
-                  value={clienteInput}
-                  onChange={(e) => setClienteInput(e.target.value)}
-                  className="search-input-dark"
-                  style={{ paddingLeft: '12px' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '4px', color: '#94A3B8' }}>Assunto / Ação</label>
-                <input
-                  type="text"
-                  placeholder="Ex: Ação de Cobrança"
-                  value={assuntoInput}
-                  onChange={(e) => setAssuntoInput(e.target.value)}
-                  className="search-input-dark"
-                  style={{ paddingLeft: '12px' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-                <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">Cancelar</button>
-                <button type="submit" className="btn-primary">Salvar Processo</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Popup Modal: Criar / Editar Processo (com Blur) */}
+      <FormProcessoModal
+        isOpen={showFormModal}
+        onClose={() => setShowFormModal(false)}
+        onSave={handleSaveProcesso}
+        initialData={editingProcesso}
+      />
 
       <ToastNotification message={toast} onClose={() => setToast(null)} />
     </div>
