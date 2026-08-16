@@ -19,36 +19,32 @@ export default function ToastNotification({ message, type = 'success', onClose }
     <div
       style={{
         position: 'fixed',
-        bottom: '28px',
-        right: '28px',
+        bottom: '24px',
+        right: '24px',
         zIndex: 200,
         display: 'flex',
         alignItems: 'center',
         gap: '14px',
-        padding: '16px 22px',
-        borderRadius: '16px',
+        padding: '16px 20px',
+        borderRadius: '12px',
         backgroundColor: 'var(--card-bg)',
-        backdropFilter: 'blur(16px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-        border: `1px solid ${isSuccess ? 'rgba(55, 116, 255, 0.4)' : 'rgba(249, 61, 74, 0.4)'}`,
-        boxShadow: isSuccess
-          ? '0 12px 35px -5px rgba(55, 116, 255, 0.25), 0 4px 15px rgba(0,0,0,0.1)'
-          : '0 12px 35px -5px rgba(249, 61, 74, 0.25), 0 4px 15px rgba(0,0,0,0.1)',
+        border: `1px solid ${isSuccess ? '#3774FF' : '#F93D4A'}`,
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
         color: 'var(--text-page)',
-        animation: 'slideInToast 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+        animation: 'slideInToast 0.3s ease',
         maxWidth: '380px'
       }}
     >
-      <div style={{ padding: '8px', borderRadius: '12px', backgroundColor: isSuccess ? 'rgba(55, 116, 255, 0.15)' : 'rgba(249, 61, 74, 0.15)' }}>
+      <div style={{ padding: '6px', borderRadius: '8px', backgroundColor: isSuccess ? 'rgba(55, 116, 255, 0.1)' : 'rgba(249, 61, 74, 0.1)' }}>
         {isSuccess ? (
-          <CheckCircle2 size={22} color="#3774FF" />
+          <CheckCircle2 size={20} color="#3774FF" />
         ) : (
-          <AlertCircle size={22} color="#F93D4A" />
+          <AlertCircle size={20} color="#F93D4A" />
         )}
       </div>
 
       <div style={{ flex: 1 }}>
-        <p style={{ fontWeight: 700, fontSize: '0.92rem' }}>
+        <p style={{ fontWeight: 700, fontSize: '0.9rem' }}>
           {isSuccess ? 'Sucesso' : 'Atenção'}
         </p>
         <p style={{ fontSize: '0.85rem', opacity: 0.85, marginTop: '2px' }}>
@@ -62,7 +58,7 @@ export default function ToastNotification({ message, type = 'success', onClose }
         style={{ color: 'var(--text-page)', opacity: 0.6, cursor: 'pointer', padding: '4px' }}
         aria-label="Fechar notificação"
       >
-        <X size={18} />
+        <X size={16} />
       </button>
     </div>
   );
