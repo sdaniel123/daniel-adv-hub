@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu, Search, Bell, Settings, Moon, Sun, User } from 'lucide-react';
 
 export default function TopNavbar({ onToggleSidebar, isDarkMode, onToggleTheme, onOpenProfile }) {
@@ -16,8 +17,17 @@ export default function TopNavbar({ onToggleSidebar, isDarkMode, onToggleTheme, 
         >
           <Menu size={24} color="#FFFFFF" />
         </button>
-        <Link href="/" className="office-logo">
-          DANIEL ADV HUB
+        <Link href="/" className="office-logo" style={{ display: 'flex', alignItems: 'center' }}>
+          <img
+            src="/images/logo-horizontal.png"
+            alt="Daniel Simões Advocacia"
+            style={{
+              height: '38px',
+              width: 'auto',
+              filter: 'brightness(0) invert(1)',
+              objectFit: 'contain'
+            }}
+          />
         </Link>
       </div>
 
