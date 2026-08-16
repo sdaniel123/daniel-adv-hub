@@ -33,17 +33,17 @@ export default function MonthCalendar() {
   return (
     <div className="card-glass-3d" style={{ marginBottom: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-        <h3 style={{ fontFamily: 'var(--font-raleway)', fontSize: '1.1rem', fontWeight: 800 }}>
+        <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.05rem', fontWeight: 700 }}>
           Mês: {months[currentMonthIndex]} {currentYear}
         </h3>
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '6px' }}>
           <button
             type="button"
             onClick={prevMonth}
             style={{
-              width: '32px',
-              height: '32px',
+              width: '30px',
+              height: '30px',
               borderRadius: '50%',
               border: '1px solid var(--card-border)',
               display: 'flex',
@@ -53,14 +53,14 @@ export default function MonthCalendar() {
             }}
             aria-label="Mês anterior"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={15} />
           </button>
           <button
             type="button"
             onClick={nextMonth}
             style={{
-              width: '32px',
-              height: '32px',
+              width: '30px',
+              height: '30px',
               borderRadius: '50%',
               border: '1px solid var(--card-border)',
               display: 'flex',
@@ -70,22 +70,22 @@ export default function MonthCalendar() {
             }}
             aria-label="Próximo mês"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={15} />
           </button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px', textAlign: 'center', marginBottom: '10px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center', marginBottom: '8px' }}>
         {weekHeaders.map((h, i) => (
-          <div key={i} style={{ fontSize: '0.85rem', fontWeight: 800, opacity: 0.8 }}>
+          <div key={i} style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-gold)' }}>
             {h}
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
         {daysGrid.map((row, rIdx) => (
-          <div key={rIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px', textAlign: 'center' }}>
+          <div key={rIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', textAlign: 'center' }}>
             {row.map((day, dIdx) => {
               const isToday = rIdx === 2 && day === 16;
               const isOtherMonth = rIdx === 4 && day <= 4;
@@ -94,14 +94,14 @@ export default function MonthCalendar() {
                 <div
                   key={dIdx}
                   style={{
-                    padding: '8px 0',
+                    padding: '6px 0',
                     borderRadius: '50%',
-                    fontSize: '0.88rem',
-                    fontWeight: isToday ? 800 : 500,
-                    backgroundColor: isToday ? '#000000' : 'transparent',
-                    color: isToday ? '#FFFFFF' : isOtherMonth ? 'rgba(0,0,0,0.3)' : 'var(--text-page)',
+                    fontSize: '0.85rem',
+                    fontWeight: isToday ? 700 : 500,
+                    backgroundColor: isToday ? 'var(--color-midnight)' : 'transparent',
+                    color: isToday ? 'var(--color-gold)' : isOtherMonth ? 'rgba(100,116,139,0.4)' : 'var(--text-page)',
                     cursor: 'pointer',
-                    border: isToday ? '1px solid #000000' : 'none'
+                    border: isToday ? '1px solid var(--color-gold)' : 'none'
                   }}
                 >
                   {day}

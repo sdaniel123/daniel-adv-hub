@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Sparkles, AlertCircle, ChevronRight, Plus, X } from 'lucide-react';
+import { Sparkles, AlertCircle, ChevronRight, X } from 'lucide-react';
 import InteractiveChart from '@/components/dashboard/InteractiveChart';
 import MonthCalendar from '@/components/dashboard/MonthCalendar';
 import ToastNotification from '@/components/ui/ToastNotification';
@@ -62,13 +62,13 @@ export default function HomePage() {
     <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '20px' }}>
         <div>
-          <span style={{ fontSize: '0.85rem', fontWeight: 700, opacity: 0.75, textTransform: 'uppercase', letterSpacing: '1px' }}>
+          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '1px' }}>
             Bem-vindo(a)
           </span>
-          <h1 style={{ fontFamily: 'var(--font-raleway)', fontSize: '2.2rem', marginTop: '2px', fontWeight: 800 }}>
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.2rem', marginTop: '2px', fontWeight: 700 }}>
             Daniel G. Simões
           </h1>
-          <p style={{ fontSize: '0.85rem', opacity: 0.7, marginTop: '4px' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
             {timeString || '16 de Agosto de 2026 | 13:48h'}
           </p>
         </div>
@@ -76,57 +76,27 @@ export default function HomePage() {
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           <button
             type="button"
+            className="action-btn-3d"
             onClick={() => handleOpenModal('cliente')}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '24px',
-              border: '1px solid var(--card-border)',
-              backgroundColor: 'var(--card-bg)',
-              color: 'var(--text-page)',
-              fontWeight: 700,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-              transition: 'transform 0.2s ease'
-            }}
+            style={{ borderRadius: '20px' }}
           >
             Novo cliente
           </button>
 
           <button
             type="button"
+            className="action-btn-3d"
             onClick={() => handleOpenModal('processo')}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '24px',
-              border: '1px solid var(--card-border)',
-              backgroundColor: 'var(--card-bg)',
-              color: 'var(--text-page)',
-              fontWeight: 700,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-              transition: 'transform 0.2s ease'
-            }}
+            style={{ borderRadius: '20px' }}
           >
             Novo Processo
           </button>
 
           <button
             type="button"
+            className="action-btn-3d"
             onClick={() => handleOpenModal('prazo')}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '24px',
-              border: '1px solid var(--card-border)',
-              backgroundColor: 'var(--card-bg)',
-              color: 'var(--text-page)',
-              fontWeight: 700,
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-              transition: 'transform 0.2s ease'
-            }}
+            style={{ borderRadius: '20px' }}
           >
             Novo Prazo
           </button>
@@ -134,18 +104,17 @@ export default function HomePage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '28px', marginBottom: '32px' }}>
-        
         <div className="card-glass-3d" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ fontFamily: 'var(--font-raleway)', fontSize: '1.35rem', fontWeight: 800 }}>
+              <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', fontWeight: 700 }}>
                 Meu compromissos
               </h2>
               <Link
                 href="/prazos"
                 style={{
-                  width: '36px',
-                  height: '36px',
+                  width: '34px',
+                  height: '34px',
                   borderRadius: '50%',
                   border: '1px solid var(--card-border)',
                   display: 'flex',
@@ -155,11 +124,11 @@ export default function HomePage() {
                 }}
                 aria-label="Ver todos os compromissos"
               >
-                <ChevronRight size={18} />
+                <ChevronRight size={16} />
               </Link>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {mockCompromissos.map((item) => (
                 <div
                   key={item.id}
@@ -168,23 +137,23 @@ export default function HomePage() {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     padding: '12px 14px',
-                    borderRadius: '12px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.03)',
+                    borderRadius: '10px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.02)',
                     border: '1px solid var(--card-border)'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, paddingRight: '12px' }}>
                     {item.isUrgent ? (
-                      <AlertCircle size={18} color="#F93D4A" style={{ flexShrink: 0 }} />
+                      <AlertCircle size={17} color="#DC2626" style={{ flexShrink: 0 }} />
                     ) : (
-                      <Sparkles size={18} color="#3774FF" style={{ flexShrink: 0 }} />
+                      <Sparkles size={17} color="#C5A059" style={{ flexShrink: 0 }} />
                     )}
-                    <span style={{ fontSize: '0.9rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '0.88rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {item.title}
                     </span>
                   </div>
 
-                  <span className={item.isUrgent ? 'badge-pill-error' : 'badge-pill-success'} style={{ fontSize: '0.78rem' }}>
+                  <span className={item.isUrgent ? 'badge-pill-error' : 'badge-pill-success'}>
                     {item.status}
                   </span>
                 </div>
@@ -195,15 +164,15 @@ export default function HomePage() {
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
             <span
               style={{
-                width: '38px',
-                height: '38px',
+                width: '36px',
+                height: '36px',
                 borderRadius: '50%',
                 border: '1px solid var(--card-border)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '0.85rem',
-                fontWeight: 800
+                fontSize: '0.82rem',
+                fontWeight: 700
               }}
             >
               +10
@@ -223,16 +192,16 @@ export default function HomePage() {
                 justify: 'space-between',
                 alignItems: 'center',
                 padding: '16px 24px',
-                borderRadius: '30px',
+                borderRadius: '24px',
                 textDecoration: 'none',
                 color: 'var(--text-page)'
               }}
             >
-              <span style={{ fontSize: '1rem', fontWeight: 700 }}>Clientes</span>
+              <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>Clientes</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-montserrat)' }}>154</span>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChevronRight size={16} />
+                <span style={{ fontSize: '1.35rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>154</span>
+                <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ChevronRight size={15} />
                 </div>
               </div>
             </Link>
@@ -245,16 +214,16 @@ export default function HomePage() {
                 justify: 'space-between',
                 alignItems: 'center',
                 padding: '16px 24px',
-                borderRadius: '30px',
+                borderRadius: '24px',
                 textDecoration: 'none',
                 color: 'var(--text-page)'
               }}
             >
-              <span style={{ fontSize: '1rem', fontWeight: 700 }}>Processos</span>
+              <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>Processos</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontSize: '1.4rem', fontWeight: 800, fontFamily: 'var(--font-montserrat)' }}>48</span>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChevronRight size={16} />
+                <span style={{ fontSize: '1.35rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>48</span>
+                <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ChevronRight size={15} />
                 </div>
               </div>
             </Link>
@@ -267,16 +236,16 @@ export default function HomePage() {
                 justify: 'space-between',
                 alignItems: 'center',
                 padding: '16px 24px',
-                borderRadius: '30px',
+                borderRadius: '24px',
                 textDecoration: 'none',
                 color: 'var(--text-page)'
               }}
             >
-              <span style={{ fontSize: '1rem', fontWeight: 700 }}>Ganhos</span>
+              <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>Ganhos</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontSize: '1.3rem', fontWeight: 800, fontFamily: 'var(--font-montserrat)' }}>R$ 42.850,00</span>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChevronRight size={16} />
+                <span style={{ fontSize: '1.25rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>R$ 42.850,00</span>
+                <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ChevronRight size={15} />
                 </div>
               </div>
             </Link>
@@ -289,16 +258,16 @@ export default function HomePage() {
                 justify: 'space-between',
                 alignItems: 'center',
                 padding: '16px 24px',
-                borderRadius: '30px',
+                borderRadius: '24px',
                 textDecoration: 'none',
                 color: 'var(--text-page)'
               }}
             >
-              <span style={{ fontSize: '1rem', fontWeight: 700 }}>Gastos</span>
+              <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>Gastos</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontSize: '1.3rem', fontWeight: 800, fontFamily: 'var(--font-montserrat)' }}>R$ 6.420,00</span>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChevronRight size={16} />
+                <span style={{ fontSize: '1.25rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>R$ 6.420,00</span>
+                <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ChevronRight size={15} />
                 </div>
               </div>
             </Link>
@@ -322,19 +291,19 @@ export default function HomePage() {
             style={{ width: '90%', maxWidth: '440px', margin: 0 }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontFamily: 'var(--font-raleway)', fontSize: '1.25rem', fontWeight: 800 }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 700 }}>
                 {activeModal === 'cliente' && 'Cadastrar Novo Cliente'}
                 {activeModal === 'processo' && 'Cadastrar Novo Processo'}
                 {activeModal === 'prazo' && 'Lançar Novo Prazo'}
               </h3>
               <button type="button" onClick={() => setActiveModal(null)} aria-label="Fechar modal">
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleSaveModal} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
                   Nome / Título
                 </label>
                 <input
@@ -345,10 +314,10 @@ export default function HomePage() {
                   onChange={(e) => setModalInput(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
                     border: '1px solid var(--card-border)',
-                    backgroundColor: 'rgba(0,0,0,0.04)',
+                    backgroundColor: 'rgba(0,0,0,0.02)',
                     color: 'var(--text-page)',
                     outline: 'none'
                   }}
@@ -359,7 +328,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={() => setActiveModal(null)}
-                  style={{ padding: '10px 18px', borderRadius: '12px', border: '1px solid var(--card-border)', fontWeight: 600 }}
+                  style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid var(--card-border)', fontWeight: 600 }}
                 >
                   Cancelar
                 </button>

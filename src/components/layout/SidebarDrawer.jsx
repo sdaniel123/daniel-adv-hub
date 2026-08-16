@@ -27,13 +27,13 @@ export default function SidebarDrawer({ isOpen, onClose, onLogout }) {
 
       <aside className={`sidebar-drawer ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-top">
-          <div className="sidebar-header" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '12px' }}>
+          <div className="sidebar-header">
             <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
               <img
                 src="/images/logo-vertical.png"
                 alt="Daniel Simões Advocacia"
                 style={{
-                  height: '52px',
+                  height: '48px',
                   width: 'auto',
                   filter: 'brightness(0) invert(1)',
                   objectFit: 'contain'
@@ -48,8 +48,8 @@ export default function SidebarDrawer({ isOpen, onClose, onLogout }) {
                 <X size={20} color="#FFFFFF" />
               </button>
             </div>
-            <span className="sidebar-title" style={{ fontSize: '0.85rem', opacity: 0.8, fontWeight: 600 }}>
-              Hub de Gestão
+            <span style={{ fontSize: '0.78rem', color: '#C5A059', fontWeight: 600, letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+              Hub de Gestão Jurídica
             </span>
           </div>
 
@@ -72,7 +72,7 @@ export default function SidebarDrawer({ isOpen, onClose, onLogout }) {
                       tabIndex={isActive ? -1 : 0}
                       aria-disabled={isActive}
                     >
-                      <IconComponent size={20} color={isActive ? '#DBDBDB' : '#FFFFFF'} />
+                      <IconComponent size={18} color={isActive ? '#C5A059' : '#FFFFFF'} />
                       <span>{item.label}</span>
                     </Link>
                   </li>
@@ -91,7 +91,7 @@ export default function SidebarDrawer({ isOpen, onClose, onLogout }) {
               if (onLogout) onLogout();
             }}
           >
-            <LogOut size={18} color="#FFFFFF" />
+            <LogOut size={16} color="#FFFFFF" />
             <span>Sair</span>
           </button>
         </div>

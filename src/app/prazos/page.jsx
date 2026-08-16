@@ -8,10 +8,10 @@ export default function PrazosPage() {
     <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-error)', textTransform: 'uppercase', letterSpacing: '1.2px' }}>
+          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-error)', textTransform: 'uppercase', letterSpacing: '1px' }}>
             Controle de Agendamentos
           </span>
-          <h1 style={{ fontFamily: 'var(--font-raleway)', fontSize: '2.2rem', marginTop: '4px', fontWeight: 700 }}>
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.2rem', marginTop: '2px', fontWeight: 700 }}>
             Prazos & Agenda
           </h1>
         </div>
@@ -23,47 +23,47 @@ export default function PrazosPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
-        <div className="card-glass-3d" style={{ borderLeft: '5px solid #F93D4A' }}>
+        <div className="card-glass-3d" style={{ borderLeft: '4px solid #DC2626' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
             <div>
               <span className="badge-pill-error" style={{ marginBottom: '8px' }}>
                 <AlertCircle size={14} /> Prazo Fatal (Hoje)
               </span>
-              <h3 style={{ fontFamily: 'var(--font-raleway)', fontSize: '1.25rem', fontWeight: 700 }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 700 }}>
                 Protocolo de Contestação
               </h3>
-              <p style={{ fontSize: '0.85rem', opacity: 0.75, marginTop: '4px' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                 Proc. nº 1042345-12.2026.8.26.0100
               </p>
             </div>
-            <Calendar size={22} color="#F93D4A" />
+            <Calendar size={22} color="#DC2626" />
           </div>
 
           <div style={{ fontSize: '0.88rem', borderTop: '1px solid var(--card-border)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>Vencimento: <strong>Hoje às 23:59</strong></span>
-            <span style={{ color: '#F93D4A', fontWeight: 700, cursor: 'pointer' }}>Concluir →</span>
+            <span style={{ color: '#DC2626', fontWeight: 700, cursor: 'pointer' }}>Concluir →</span>
           </div>
         </div>
 
-        <div className="card-glass-3d" style={{ borderLeft: '5px solid #3774FF' }}>
+        <div className="card-glass-3d" style={{ borderLeft: '4px solid #2563EB' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
             <div>
               <span className="badge-pill-success" style={{ marginBottom: '8px' }}>
                 <CheckCircle2 size={14} /> Em Prazo (Amanhã)
               </span>
-              <h3 style={{ fontFamily: 'var(--font-raleway)', fontSize: '1.25rem', fontWeight: 700 }}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 700 }}>
                 Audiência de Conciliação
               </h3>
-              <p style={{ fontSize: '0.85rem', opacity: 0.75, marginTop: '4px' }}>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                 Proc. nº 0000845-90.2026.5.02.0001
               </p>
             </div>
-            <Calendar size={22} color="#3774FF" />
+            <Calendar size={22} color="#2563EB" />
           </div>
 
           <div style={{ fontSize: '0.88rem', borderTop: '1px solid var(--card-border)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>Data: <strong>Amanhã às 14:00</strong></span>
-            <span style={{ color: '#3774FF', fontWeight: 700, cursor: 'pointer' }}>Detalhes →</span>
+            <span style={{ color: '#2563EB', fontWeight: 700, cursor: 'pointer' }}>Detalhes →</span>
           </div>
         </div>
       </div>
