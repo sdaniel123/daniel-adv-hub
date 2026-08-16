@@ -300,3 +300,31 @@ input, textarea, select {
     margin-left: 0;
   }
 }
+
+/* Print CSS for Ficha Dossiê PDF Export */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .printable-ficha, .printable-ficha * {
+    visibility: visible;
+  }
+  .printable-ficha {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+  }
+  .printable-ficha h2, .printable-ficha h3, .printable-ficha h4, .printable-ficha h5, .printable-ficha p, .printable-ficha span, .printable-ficha strong {
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
