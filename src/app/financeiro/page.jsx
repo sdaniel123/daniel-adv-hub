@@ -1,50 +1,66 @@
 'use client';
 
 import React from 'react';
-import { DollarSign, Plus } from 'lucide-react';
+import { DollarSign, Plus, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 export default function FinanceiroPage() {
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
+    <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-success)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Gestão Financeira
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-success)', textTransform: 'uppercase', letterSpacing: '1.2px' }}>
+            Fluxo de Caixa & Honorários
           </span>
-          <h1 style={{ fontFamily: 'var(--font-raleway)', fontSize: '2rem', marginTop: '6px', fontWeight: 700 }}>
-            Financeiro
+          <h1 style={{ fontFamily: 'var(--font-raleway)', fontSize: '2.2rem', marginTop: '4px', fontWeight: 700 }}>
+            Gestão Financeira
           </h1>
         </div>
 
-        <button
-          type="button"
-          style={{
-            backgroundColor: 'var(--color-success)',
-            color: 'var(--color-white)',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer'
-          }}
-        >
+        <button type="button" className="action-btn-3d">
           <Plus size={18} />
-          Nova Lançamento
+          Novo Lançamento
         </button>
       </div>
 
-      <div className="card-popup">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <DollarSign size={24} color="#3774FF" />
-          <h2 style={{ fontFamily: 'var(--font-raleway)', fontSize: '1.2rem', fontWeight: 600 }}>
-            Honorários e Despesas
-          </h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+        <div className="card-glass-3d">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, opacity: 0.85 }}>Receita Bruta (Mês)</span>
+            <ArrowUpRight size={22} color="#3774FF" />
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-montserrat)', marginBottom: '8px' }}>
+            R$ 42.850,00
+          </div>
+          <span className="badge-pill-success">
+            <TrendingUp size={13} /> Entrada confirmada
+          </span>
         </div>
-        <p style={{ opacity: '0.8' }}>
-          Módulo de controle de fluxo de caixa, honorários advocatícios e custas processuais.
-        </p>
+
+        <div className="card-glass-3d">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, opacity: 0.85 }}>Custas & Despesas</span>
+            <ArrowDownRight size={22} color="#F93D4A" />
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-montserrat)', marginBottom: '8px' }}>
+            R$ 6.420,00
+          </div>
+          <span className="badge-pill-error">
+            Custas processuais
+          </span>
+        </div>
+
+        <div className="card-glass-3d">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, opacity: 0.85 }}>Saldo Líquido</span>
+            <DollarSign size={22} color="#3774FF" />
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-montserrat)', marginBottom: '8px' }}>
+            R$ 36.430,00
+          </div>
+          <span className="badge-pill-success">
+            Lucro operacional
+          </span>
+        </div>
       </div>
     </div>
   );
