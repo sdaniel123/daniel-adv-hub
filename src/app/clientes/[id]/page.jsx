@@ -8,7 +8,7 @@ import {
   Printer, 
   Edit3, 
   Trash2, 
-  Star, 
+  AlertCircle, 
   ShieldAlert, 
   Building, 
   Save, 
@@ -150,7 +150,7 @@ export default function ClienteDetalhesPage() {
           <div>
             <span className="page-header-subtitle">DANIEL ADV HUB • FICHA DO CLIENTE</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '6px' }}>
-              {cliente.prioritario && <Star size={24} color="#F59E0B" fill="#F59E0B" title="Cliente Prioritário" />}
+              {cliente.prioritario && <AlertCircle size={22} color="#F59E0B" title="Cliente Prioritário" />}
               <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#FFFFFF', fontFamily: 'var(--font-serif)' }}>
                 {cliente.nome}
               </h1>
@@ -169,8 +169,8 @@ export default function ClienteDetalhesPage() {
                 </span>
               )}
               {cliente.prioritario && (
-                <span className="badge-saas badge-warning">
-                  ⭐ Prioritário
+                <span className="badge-saas badge-warning" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <AlertCircle size={12} /> Prioritário
                 </span>
               )}
             </div>

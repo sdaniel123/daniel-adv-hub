@@ -632,8 +632,7 @@ export default function FormClienteModal({ isOpen, onClose, onSave, initialData 
                 onChange={(e) => handleChange('prioritario', e.target.checked)}
                 style={{ width: '16px', height: '16px', accentColor: '#F59E0B' }}
               />
-              <Star size={16} color="#F59E0B" fill={formData.prioritario ? '#F59E0B' : 'none'} />
-              Marcar este cliente como Prioritário ⭐
+              Marcar este cliente como Prioritário
             </label>
 
             <div>

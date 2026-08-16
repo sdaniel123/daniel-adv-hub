@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
   Users, 
-  Star, 
+  AlertCircle, 
   Key, 
   Calendar, 
   Search, 
@@ -142,7 +142,7 @@ export default function ClientesPage() {
               </div>
             </div>
             <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#131D33', color: '#F59E0B' }}>
-              <Star size={18} />
+              <AlertCircle size={18} />
             </div>
           </div>
         </div>
@@ -262,7 +262,7 @@ export default function ClientesPage() {
                     <td style={{ padding: '16px 20px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {cli.prioritario && (
-                          <Star size={15} color="#F59E0B" fill="#F59E0B" title="Cliente Prioritário" />
+                          <AlertCircle size={15} color="#F59E0B" title="Cliente Prioritário" />
                         )}
                         <span style={{ fontWeight: 700, color: '#FFFFFF' }}>{cli.nome}</span>
                       </div>
