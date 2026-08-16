@@ -17,38 +17,29 @@ export default function Header({ onToggleSidebar, isDarkMode, onToggleTheme, onT
           <Menu size={20} />
         </button>
 
-        <div style={{ position: 'relative', width: '320px', display: 'flex', alignItems: 'center' }}>
-          <Search size={16} style={{ position: 'absolute', left: '14px', color: 'var(--text-muted)' }} />
+        <div style={{ position: 'relative', width: '340px', display: 'flex', alignItems: 'center' }}>
+          <Search size={15} style={{ position: 'absolute', left: '14px', color: 'var(--text-muted)' }} />
           <input
             type="text"
-            placeholder="Pesquisar clientes, processos, documentos..."
-            style={{
-              width: '100%',
-              padding: '9px 40px 9px 40px',
-              borderRadius: '20px',
-              border: '1px solid var(--border-light)',
-              backgroundColor: 'var(--bg-main)',
-              color: 'var(--text-main)',
-              fontSize: '0.85rem',
-              outline: 'none'
-            }}
+            placeholder="Pesquisar clientes, processos, prazos..."
+            className="search-input-dark"
           />
-          <span style={{ position: 'absolute', right: '12px', fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', backgroundColor: 'var(--border-light)', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+          <span style={{ position: 'absolute', right: '12px', fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', backgroundColor: '#162035', padding: '2px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: '2px' }}>
             <Command size={10} /> K
           </span>
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <button
           type="button"
           onClick={onToggleNotifications}
           style={{ position: 'relative', padding: '8px', borderRadius: '50%', color: 'var(--text-main)' }}
           aria-label="Central de notificações"
         >
-          <Bell size={20} />
+          <Bell size={19} />
           {unreadCount > 0 && (
-            <span style={{ position: 'absolute', top: '4px', right: '4px', width: '18px', height: '18px', borderRadius: '50%', backgroundColor: '#F43F5E', color: '#FFFFFF', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ position: 'absolute', top: '4px', right: '4px', width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#EF4444', color: '#FFFFFF', fontSize: '0.68rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {unreadCount}
             </span>
           )}
@@ -60,16 +51,16 @@ export default function Header({ onToggleSidebar, isDarkMode, onToggleTheme, onT
           style={{ padding: '8px', borderRadius: '50%', color: 'var(--text-main)' }}
           aria-label="Alternar tema"
         >
-          {isDarkMode ? <Sun size={20} color="#F59E0B" /> : <Moon size={20} />}
+          {isDarkMode ? <Sun size={19} color="#F59E0B" /> : <Moon size={19} />}
         </button>
 
         <Link href="/perfil" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', color: 'var(--text-main)' }}>
-          <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: 'var(--primary-light)', border: '2px solid var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)' }}>
-            <User size={20} />
+          <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#131D33', border: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3B82F6' }}>
+            <User size={18} />
           </div>
-          <div style={{ textAlign: 'left', display: 'none', smDisplay: 'block' }}>
-            <p style={{ fontSize: '0.88rem', fontWeight: 700, lineHeight: 1.2 }}>Dr. Daniel Simões</p>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>OAB 000.000/UF</p>
+          <div style={{ textAlign: 'left' }}>
+            <p style={{ fontSize: '0.85rem', fontWeight: 700, lineHeight: 1.2 }}>Dr. Daniel Simões</p>
+            <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>OAB 000.000/UF</p>
           </div>
         </Link>
       </div>
