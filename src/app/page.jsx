@@ -2,344 +2,220 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Sparkles, AlertCircle, ChevronRight, X } from 'lucide-react';
-import InteractiveChart from '@/components/dashboard/InteractiveChart';
-import MonthCalendar from '@/components/dashboard/MonthCalendar';
+import { FileText, Clock, Users, DollarSign, TrendingUp, AlertCircle, Plus, ChevronRight, CheckCircle2 } from 'lucide-react';
 import ToastNotification from '@/components/ui/ToastNotification';
-
-const mockCompromissos = [
-  { id: '1', title: 'Audiência de Conciliação - Proc. 1042345-12', status: 'Fatal', isUrgent: true },
-  { id: '2', title: 'Protocolo de Contestação Trabalhista', status: 'Pendente', isUrgent: true },
-  { id: '3', title: 'Reunião com cliente Tech Solutions', status: 'Agendado', isUrgent: false },
-  { id: '4', title: 'Elaboração de Minuta de Contrato', status: 'Em andamento', isUrgent: false },
-  { id: '5', title: 'Pagamento de Custas Processuais TJSP', status: 'Pendente', isUrgent: true },
-  { id: '6', title: 'Réplica à Contestação - Proc. 0000845-90', status: 'Concluído', isUrgent: false },
-  { id: '7', title: 'Conferência de Prazos Fatais da Semana', status: 'Concluído', isUrgent: false },
-  { id: '8', title: 'Envio de Notificação Extrajudicial', status: 'Em andamento', isUrgent: false },
-  { id: '9', title: 'Consulta Inicial - Novo Cliente Cível', status: 'Agendado', isUrgent: false },
-  { id: '10', title: 'Revisão de Procuração e Documentos', status: 'Concluído', isUrgent: false },
-  { id: '11', title: 'Recurso de Apelação - Proc. 5001234-88', status: 'Pendente', isUrgent: true },
-  { id: '12', title: 'Perícia Técnica Trabalhista', status: 'Agendado', isUrgent: false },
-];
 
 export default function HomePage() {
   const [toastMessage, setToastMessage] = useState(null);
-  const [activeModal, setActiveModal] = useState(null);
-  const [modalInput, setModalInput] = useState('');
   const [timeString, setTimeString] = useState('');
 
   useEffect(() => {
-    const updateDateTime = () => {
+    const updateTime = () => {
       const now = new Date();
       const options = { day: 'numeric', month: 'long', year: 'numeric' };
       const dateFormatted = now.toLocaleDateString('pt-BR', options);
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
-      setTimeString(`${dateFormatted} | ${hours}:${minutes}h`);
+      setTimeString(`${dateFormatted} • ${hours}:${minutes}h`);
     };
-    updateDateTime();
-    const interval = setInterval(updateDateTime, 30000);
+    updateTime();
+    const interval = setInterval(updateTime, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const handleOpenModal = (modalType) => {
-    setActiveModal(modalType);
-    setModalInput('');
-  };
-
-  const handleSaveModal = (e) => {
-    e.preventDefault();
-    const labels = {
-      cliente: 'Novo Cliente',
-      processo: 'Novo Processo',
-      prazo: 'Novo Prazo'
-    };
-    setToastMessage(`${labels[activeModal] || 'Registro'} adicionado com sucesso!`);
-    setActiveModal(null);
-  };
-
   return (
-    <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+    <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '20px' }}>
         <div>
-          <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--color-gold)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-            Bem-vindo(a)
+          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--primary)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            Painel Geral
           </span>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2.2rem', marginTop: '2px', fontWeight: 700 }}>
-            Daniel G. Simões
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2.2rem', marginTop: '2px', fontWeight: 800 }}>
+            Visão Executiva
           </h1>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            {timeString || '16 de Agosto de 2026 | 13:48h'}
+            {timeString || '16 de Agosto de 2026 • 15:15h'}
           </p>
         </div>
 
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            className="action-btn-3d"
-            onClick={() => handleOpenModal('cliente')}
-            style={{ borderRadius: '20px' }}
-          >
-            Novo cliente
-          </button>
+          <Link href="/clientes" className="btn-secondary">
+            <Plus size={16} />
+            <span>Novo Cliente</span>
+          </Link>
+          <Link href="/processos" className="btn-secondary">
+            <Plus size={16} />
+            <span>Novo Processo</span>
+          </Link>
+          <Link href="/prazos" className="btn-primary">
+            <Plus size={16} />
+            <span>Novo Prazo</span>
+          </Link>
+        </div>
+      </div>
 
-          <button
-            type="button"
-            className="action-btn-3d"
-            onClick={() => handleOpenModal('processo')}
-            style={{ borderRadius: '20px' }}
-          >
-            Novo Processo
-          </button>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+        <div className="card-saas">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-muted)' }}>Processos Ativos</span>
+            <div style={{ padding: '8px', borderRadius: '10px', backgroundColor: 'var(--primary-light)' }}>
+              <FileText size={20} color="var(--primary)" />
+            </div>
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-display)', marginBottom: '8px' }}>
+            48
+          </div>
+          <span className="badge-saas badge-success">
+            <TrendingUp size={12} /> +12% este mês
+          </span>
+        </div>
 
-          <button
-            type="button"
-            className="action-btn-3d"
-            onClick={() => handleOpenModal('prazo')}
-            style={{ borderRadius: '20px' }}
-          >
-            Novo Prazo
-          </button>
+        <div className="card-saas">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-muted)' }}>Prazos da Semana</span>
+            <div style={{ padding: '8px', borderRadius: '10px', backgroundColor: 'var(--danger-bg)' }}>
+              <Clock size={20} color="var(--danger)" />
+            </div>
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-display)', marginBottom: '8px' }}>
+            12
+          </div>
+          <span className="badge-saas badge-danger">
+            <AlertCircle size={12} /> 3 urgentes hoje
+          </span>
+        </div>
+
+        <div className="card-saas">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-muted)' }}>Clientes Cadastrados</span>
+            <div style={{ padding: '8px', borderRadius: '10px', backgroundColor: 'var(--primary-light)' }}>
+              <Users size={20} color="var(--primary)" />
+            </div>
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-display)', marginBottom: '8px' }}>
+            154
+          </div>
+          <span className="badge-saas badge-success">
+            <CheckCircle2 size={12} /> Base ativa
+          </span>
+        </div>
+
+        <div className="card-saas">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <span style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-muted)' }}>Honorários (Mês)</span>
+            <div style={{ padding: '8px', borderRadius: '10px', backgroundColor: 'var(--primary-light)' }}>
+              <DollarSign size={20} color="var(--primary)" />
+            </div>
+          </div>
+          <div style={{ fontSize: '2rem', fontWeight: 800, fontFamily: 'var(--font-display)', marginBottom: '8px' }}>
+            R$ 42.850
+          </div>
+          <span className="badge-saas badge-success">
+            <TrendingUp size={12} /> +8.4% meta
+          </span>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '28px', marginBottom: '32px' }}>
-        <div className="card-glass-3d" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', fontWeight: 700 }}>
-                Meu compromissos
+        <div className="card-saas" style={{ gridColumn: 'span 2' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <div>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700 }}>
+                Compromissos e Prazos Prioritários
               </h2>
-              <Link
-                href="/prazos"
-                style={{
-                  width: '34px',
-                  height: '34px',
-                  borderRadius: '50%',
-                  border: '1px solid var(--card-border)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--text-page)'
-                }}
-                aria-label="Ver todos os compromissos"
-              >
-                <ChevronRight size={16} />
-              </Link>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                Próximas pendências registradas no sistema
+              </p>
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {mockCompromissos.map((item) => (
-                <div
-                  key={item.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '12px 14px',
-                    borderRadius: '10px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.02)',
-                    border: '1px solid var(--card-border)'
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, paddingRight: '12px' }}>
-                    {item.isUrgent ? (
-                      <AlertCircle size={17} color="#DC2626" style={{ flexShrink: 0 }} />
-                    ) : (
-                      <Sparkles size={17} color="#C5A059" style={{ flexShrink: 0 }} />
-                    )}
-                    <span style={{ fontSize: '0.88rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {item.title}
-                    </span>
-                  </div>
-
-                  <span className={item.isUrgent ? 'badge-pill-error' : 'badge-pill-success'}>
-                    {item.status}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <Link href="/prazos" className="btn-secondary" style={{ padding: '6px 14px', fontSize: '0.82rem' }}>
+              <span>Ver todos</span>
+              <ChevronRight size={14} />
+            </Link>
           </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-            <span
-              style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '50%',
-                border: '1px solid var(--card-border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '0.82rem',
-                fontWeight: 700
-              }}
-            >
-              +10
-            </span>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <MonthCalendar />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <Link
-              href="/clientes"
-              className="card-glass-3d"
-              style={{
-                display: 'flex',
-                justify: 'space-between',
-                alignItems: 'center',
-                padding: '16px 24px',
-                borderRadius: '24px',
-                textDecoration: 'none',
-                color: 'var(--text-page)'
-              }}
-            >
-              <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>Clientes</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontSize: '1.35rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>154</span>
-                <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChevronRight size={15} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#F43F5E' }} />
+                <div>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: 700 }}>Protocolo de Contestação Cível</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Proc. nº 1042345-12.2026 • 4ª Vara Cível TJSP</p>
                 </div>
               </div>
-            </Link>
-
-            <Link
-              href="/processos"
-              className="card-glass-3d"
-              style={{
-                display: 'flex',
-                justify: 'space-between',
-                alignItems: 'center',
-                padding: '16px 24px',
-                borderRadius: '24px',
-                textDecoration: 'none',
-                color: 'var(--text-page)'
-              }}
-            >
-              <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>Processos</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontSize: '1.35rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>48</span>
-                <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChevronRight size={15} />
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/financeiro"
-              className="card-glass-3d"
-              style={{
-                display: 'flex',
-                justify: 'space-between',
-                alignItems: 'center',
-                padding: '16px 24px',
-                borderRadius: '24px',
-                textDecoration: 'none',
-                color: 'var(--text-page)'
-              }}
-            >
-              <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>Ganhos</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontSize: '1.25rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>R$ 42.850,00</span>
-                <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChevronRight size={15} />
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/financeiro"
-              className="card-glass-3d"
-              style={{
-                display: 'flex',
-                justify: 'space-between',
-                alignItems: 'center',
-                padding: '16px 24px',
-                borderRadius: '24px',
-                textDecoration: 'none',
-                color: 'var(--text-page)'
-              }}
-            >
-              <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>Gastos</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <span style={{ fontSize: '1.25rem', fontWeight: 700, fontFamily: 'var(--font-heading)' }}>R$ 6.420,00</span>
-                <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '1px solid var(--card-border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <ChevronRight size={15} />
-                </div>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: '32px' }}>
-        <InteractiveChart />
-      </div>
-
-      {activeModal && (
-        <div
-          className="sidebar-overlay open"
-          onClick={() => setActiveModal(null)}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          <div
-            className="card-popup"
-            onClick={(e) => e.stopPropagation()}
-            style={{ width: '90%', maxWidth: '440px', margin: 0 }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 700 }}>
-                {activeModal === 'cliente' && 'Cadastrar Novo Cliente'}
-                {activeModal === 'processo' && 'Cadastrar Novo Processo'}
-                {activeModal === 'prazo' && 'Lançar Novo Prazo'}
-              </h3>
-              <button type="button" onClick={() => setActiveModal(null)} aria-label="Fechar modal">
-                <X size={18} />
-              </button>
+              <span className="badge-saas badge-danger">Hoje às 23:59</span>
             </div>
 
-            <form onSubmit={handleSaveModal} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
-                  Nome / Título
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Informe o nome ou título..."
-                  value={modalInput}
-                  onChange={(e) => setModalInput(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: '1px solid var(--card-border)',
-                    backgroundColor: 'rgba(0,0,0,0.02)',
-                    color: 'var(--text-page)',
-                    outline: 'none'
-                  }}
-                />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#4F46E5' }} />
+                <div>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: 700 }}>Audiência de Conciliação</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Proc. nº 0000845-90.2026 • TRT-2 Trabalhista</p>
+                </div>
               </div>
+              <span className="badge-saas badge-primary">Amanhã às 14:00</span>
+            </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => setActiveModal(null)}
-                  style={{ padding: '10px 18px', borderRadius: '10px', border: '1px solid var(--card-border)', fontWeight: 600 }}
-                >
-                  Cancelar
-                </button>
-                <button type="submit" className="action-btn-3d">
-                  Salvar
-                </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderRadius: '10px', backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10B981' }} />
+                <div>
+                  <h4 style={{ fontSize: '0.9rem', fontWeight: 700 }}>Reunião de Alinhamento - Tech Solutions</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Atendimento presencial no escritório</p>
+                </div>
               </div>
-            </form>
+              <span className="badge-saas badge-success">18 de Agosto</span>
+            </div>
           </div>
         </div>
-      )}
+
+        <div className="card-saas">
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, marginBottom: '16px' }}>
+            Distribuição por Área
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                <span>Cível & Contratos</span>
+                <span>42% (20)</span>
+              </div>
+              <div style={{ height: '8px', borderRadius: '4px', backgroundColor: 'var(--border-light)', overflow: 'hidden' }}>
+                <div style={{ width: '42%', height: '100%', backgroundColor: '#4F46E5', borderRadius: '4px' }} />
+              </div>
+            </div>
+
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                <span>Trabalhista</span>
+                <span>33% (16)</span>
+              </div>
+              <div style={{ height: '8px', borderRadius: '4px', backgroundColor: 'var(--border-light)', overflow: 'hidden' }}>
+                <div style={{ width: '33%', height: '100%', backgroundColor: '#10B981', borderRadius: '4px' }} />
+              </div>
+            </div>
+
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                <span>Tributário & Empresarial</span>
+                <span>17% (8)</span>
+              </div>
+              <div style={{ height: '8px', borderRadius: '4px', backgroundColor: 'var(--border-light)', overflow: 'hidden' }}>
+                <div style={{ width: '17%', height: '100%', backgroundColor: '#F59E0B', borderRadius: '4px' }} />
+              </div>
+            </div>
+
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 600, marginBottom: '6px' }}>
+                <span>Família & Sucessões</span>
+                <span>8% (4)</span>
+              </div>
+              <div style={{ height: '8px', borderRadius: '4px', backgroundColor: 'var(--border-light)', overflow: 'hidden' }}>
+                <div style={{ width: '8%', height: '100%', backgroundColor: '#F43F5E', borderRadius: '4px' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <ToastNotification message={toastMessage} onClose={() => setToastMessage(null)} />
     </div>

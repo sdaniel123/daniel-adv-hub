@@ -1,13 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import TopNavbar from './TopNavbar';
-import SidebarDrawer from './SidebarDrawer';
+import { usePathname } from 'next/navigation';
+import Sidebar from './Sidebar';
+import Header from './Header';
+import NotificationDrawer from '../ui/NotificationDrawer';
 
 export default function AppLayout({ children }) {
+  const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -32,80 +35,34 @@ export default function AppLayout({ children }) {
     }
   };
 
-  const handleLogout = () => {
-    alert('Sessão encerrada com sucesso.');
-  };
+  if (pathname === '/login') {
+    return <div className="app-container">{children}</div>;
+  }
 
   return (
-    <div>
-      <TopNavbar
-        onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
-        isDarkMode={isDarkMode}
-        onToggleTheme={handleToggleTheme}
-        onOpenProfile={() => setShowProfileModal(true)}
-      />
-
-      <SidebarDrawer
+    <div className="app-container">
+      <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-        onLogout={handleLogout}
       />
 
-      <main className="main-content-wrapper">
-        {children}
-      </main>
+      <div className="main-wrapper">
+        <Header
+          onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
+          isDarkMode={isDarkMode}
+          onToggleTheme={handleToggleTheme}
+          onToggleNotifications={() => setShowNotifications((prev) => !prev)}
+        />
 
-      {showProfileModal && (
-        <div
-          className="sidebar-overlay open"
-          onClick={() => setShowProfileModal(false)}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          <div
-            className="card-popup"
-            onClick={(e) => e.stopPropagation()}
-            style={{ width: '90%', maxWidth: '420px', margin: 0, textAlign: 'center' }}
-          >
-            <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-              <img
-                src="/images/logo-monogram.png"
-                alt="Símbolo Daniel Simões Advocacia"
-                style={{
-                  height: '64px',
-                  width: 'auto',
-                  filter: isDarkMode ? 'brightness(0) invert(1)' : 'none',
-                  objectFit: 'contain'
-                }}
-              />
-            </div>
+        <main className="page-content">
+          {children}
+        </main>
+      </div>
 
-            <h2 style={{ fontFamily: 'var(--font-raleway)', marginBottom: '4px', fontWeight: 800 }}>
-              Daniel Simões
-            </h2>
-            <p style={{ fontSize: '0.85rem', color: 'var(--color-success)', fontWeight: 700, textTransform: 'uppercase', marginBottom: '16px' }}>
-              Advocacia & Consultoria
-            </p>
-
-            <div style={{ textAlign: 'left', borderTop: '1px solid var(--card-border)', paddingTop: '14px', marginBottom: '20px' }}>
-              <p style={{ marginBottom: '8px', fontSize: '0.9rem' }}>
-                <strong>Advogado Titular:</strong> Dr. Daniel Simões
-              </p>
-              <p style={{ fontSize: '0.9rem' }}>
-                <strong>OAB:</strong> 000.000/UF
-              </p>
-            </div>
-
-            <button
-              type="button"
-              className="logout-btn"
-              onClick={() => setShowProfileModal(false)}
-              style={{ backgroundColor: 'var(--color-black)', color: 'var(--color-white)' }}
-            >
-              Fechar
-            </button>
-          </div>
-        </div>
-      )}
+      <NotificationDrawer
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
     </div>
   );
 }
