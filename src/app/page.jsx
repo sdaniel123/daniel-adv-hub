@@ -1,12 +1,22 @@
 'use client';
 
-import React from 'react';
-import { CheckCircle2, AlertCircle, FileText, Clock, Users, DollarSign, TrendingUp, Scale, ArrowUpRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { CheckCircle2, AlertCircle, FileText, Clock, Users, DollarSign, TrendingUp, ArrowUpRight } from 'lucide-react';
+import InteractiveChart from '@/components/dashboard/InteractiveChart';
+import WeeklyTimeline from '@/components/dashboard/WeeklyTimeline';
+import QuickActions from '@/components/dashboard/QuickActions';
+import ToastNotification from '@/components/ui/ToastNotification';
 
 export default function HomePage() {
+  const [toastMessage, setToastMessage] = useState(null);
+
+  const handleShowToast = (msg) => {
+    setToastMessage(msg);
+  };
+
   return (
     <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
+      <div style={{ marginBottom: '28px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-success)', textTransform: 'uppercase', letterSpacing: '1.2px' }}>
             Painel Executivo
@@ -22,6 +32,10 @@ export default function HomePage() {
           </span>
         </div>
       </div>
+
+      <QuickActions onActionSuccess={handleShowToast} />
+
+      <WeeklyTimeline onSelectDay={(day) => handleShowToast(`Filtro aplicado para ${day.dayName} (${day.dateNum})`)} />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px', marginBottom: '36px' }}>
         <div className="card-glass-3d">
@@ -98,65 +112,13 @@ export default function HomePage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '24px', marginBottom: '36px' }}>
-        <div className="card-glass-3d" style={{ gridColumn: 'span 2' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <div>
-              <h2 style={{ fontFamily: 'var(--font-raleway)', fontSize: '1.35rem', fontWeight: 700 }}>
-                Distribuição de Processos por Área
-              </h2>
-              <p style={{ fontSize: '0.85rem', opacity: 0.75, marginTop: '2px' }}>
-                Acompanhamento em tempo real dos tipos de ação
-              </p>
-            </div>
-            <Scale size={24} color="#3774FF" />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.9rem', fontWeight: 600 }}>
-                <span>Direito Cível & Contratos</span>
-                <span>20 processos (42%)</span>
-              </div>
-              <div style={{ width: '100%', height: '10px', backgroundColor: 'rgba(0, 0, 0, 0.08)', borderRadius: '6px', overflow: 'hidden' }}>
-                <div style={{ width: '42%', height: '100%', backgroundColor: '#3774FF', borderRadius: '6px' }} />
-              </div>
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.9rem', fontWeight: 600 }}>
-                <span>Direito Trabalhista</span>
-                <span>16 processos (33%)</span>
-              </div>
-              <div style={{ width: '100%', height: '10px', backgroundColor: 'rgba(0, 0, 0, 0.08)', borderRadius: '6px', overflow: 'hidden' }}>
-                <div style={{ width: '33%', height: '100%', backgroundColor: '#3774FF', opacity: 0.8, borderRadius: '6px' }} />
-              </div>
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.9rem', fontWeight: 600 }}>
-                <span>Direito Empresarial & Tributário</span>
-                <span>8 processos (17%)</span>
-              </div>
-              <div style={{ width: '100%', height: '10px', backgroundColor: 'rgba(0, 0, 0, 0.08)', borderRadius: '6px', overflow: 'hidden' }}>
-                <div style={{ width: '17%', height: '100%', backgroundColor: '#3774FF', opacity: 0.6, borderRadius: '6px' }} />
-              </div>
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '0.9rem', fontWeight: 600 }}>
-                <span>Família & Sucessões</span>
-                <span>4 processos (8%)</span>
-              </div>
-              <div style={{ width: '100%', height: '10px', backgroundColor: 'rgba(0, 0, 0, 0.08)', borderRadius: '6px', overflow: 'hidden' }}>
-                <div style={{ width: '8%', height: '100%', backgroundColor: '#F93D4A', borderRadius: '6px' }} />
-              </div>
-            </div>
-          </div>
+        <div style={{ gridColumn: 'span 2' }}>
+          <InteractiveChart />
         </div>
 
         <div className="card-glass-3d">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2 style={{ fontFamily: 'var(--font-raleway)', fontSize: '1.25rem', fontWeight: 700 }}>
+            <h2 style={{ fontFamily: 'var(--font-raleway)', fontSize: '1.25rem', fontWeight: 800 }}>
               Prazos Prioritários
             </h2>
             <ArrowUpRight size={20} color="#3774FF" />
@@ -189,6 +151,8 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      <ToastNotification message={toastMessage} onClose={() => setToastMessage(null)} />
     </div>
   );
 }
