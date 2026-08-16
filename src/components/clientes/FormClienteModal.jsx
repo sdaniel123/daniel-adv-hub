@@ -136,7 +136,7 @@ export default function FormClienteModal({ isOpen, onClose, onSave, initialData 
   };
 
   return (
-    <div className="sidebar-overlay open" onClick={onClose} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+    <div className="modal-backdrop-blurred" onClick={onClose}>
       <div className="card-saas" onClick={(e) => e.stopPropagation()} style={{ width: '92%', maxWidth: '780px', maxHeight: '90vh', overflowY: 'auto', margin: 0, padding: '24px' }}>
         
         {/* Modal Header */}
