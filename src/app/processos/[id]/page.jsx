@@ -23,8 +23,9 @@ import {
 } from 'lucide-react';
 import ToastNotification from '@/components/ui/ToastNotification';
 import FormProcessoModal from '@/components/processos/FormProcessoModal';
+import DetalhesTarefaModal from '@/components/tarefas/DetalhesTarefaModal';
 import { initialProcessosData } from '@/lib/processosStore';
-import { mockTarefasData } from '@/lib/clientesStore';
+import { getTarefasSalvas, salvarTarefas, formatarDataExibicao } from '@/lib/tarefasStore';
 
 export default function ProcessoDetalhesPage() {
   const router = useRouter();
@@ -44,6 +45,28 @@ export default function ProcessoDetalhesPage() {
   const [novoAndamentoDesc, setNovoAndamentoDesc] = useState('');
   
   const [toast, setToast] = useState(null);
+  const [todasTarefas, setTodasTarefas] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
+
+  useEffect(() => {
+    setTodasTarefas(getTarefasSalvas());
+  }, []);
+
+  const handleUpdateTask = (updated) => {
+    const newTarefas = todasTarefas.map(t => t.id === updated.id ? updated : t);
+    setTodasTarefas(newTarefas);
+    salvarTarefas(newTarefas);
+    setSelectedTask(updated);
+    setToast('Tarefa atualizada!');
+  };
+
+  const handleDeleteTask = (taskId) => {
+    const newTarefas = todasTarefas.filter(t => t.id !== taskId);
+    setTodasTarefas(newTarefas);
+    salvarTarefas(newTarefas);
+    setSelectedTask(null);
+    setToast('Tarefa excluída!');
+  };
 
   useEffect(() => {
     const todayStr = new Date().toLocaleDateString('pt-BR');
@@ -87,7 +110,7 @@ export default function ProcessoDetalhesPage() {
   }
 
   // Linked tasks
-  const tarefasDoProcesso = mockTarefasData.filter(
+  const tarefasDoProcesso = todasTarefas.filter(
     (t) => t.processoId === processo.id || (t.processo && t.processo.includes(processo.cnj))
   );
 
@@ -406,20 +429,43 @@ export default function ProcessoDetalhesPage() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '350px', overflowY: 'auto' }}>
               {tarefasDoProcesso.map((tar) => (
-                <div key={tar.id} style={{ backgroundColor: '#0B101D', border: '1px solid #1B263B', borderRadius: '8px', padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#FFFFFF' }}>{tar.titulo}</div>
-                    <div style={{ fontSize: '0.76rem', color: '#94A3B8', marginTop: '2px' }}>Prazo: {tar.prazo || 'Sem prazo'}</div>
+                <div
+                  key={tar.id}
+                  onClick={() => setSelectedTask(tar)}
+                  style={{
+                    backgroundColor: '#0B101D',
+                    border: '1px solid #1B263B',
+                    borderRadius: '8px',
+                    padding: '12px 14px',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.15s ease'
+                  }}
+                  className="kanban-card-hover"
+                >
+                  <div style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '0.88rem', marginBottom: '6px' }}>
+                    {tar.tipo || tar.titulo}
                   </div>
-                  <span className={`badge-saas ${tar.status === 'Concluída' ? 'badge-success' : 'badge-warning'}`}>
-                    {tar.status || 'Pendente'}
-                  </span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#94A3B8' }}>
+                    <span>Prazo: {formatarDataExibicao(tar.prazo || tar.vencimento)}</span>
+                    <span className={`badge-saas ${tar.status === 'Concluída' || tar.status === 'Arquivada' ? 'badge-success' : 'badge-primary'}`}>
+                      {tar.status || 'Pendente'}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
       </div>
+
+      {/* Popup Detalhes da Tarefa ao clicar */}
+      <DetalhesTarefaModal
+        isOpen={!!selectedTask}
+        onClose={() => setSelectedTask(null)}
+        task={selectedTask}
+        onUpdateTask={handleUpdateTask}
+        onDeleteTask={handleDeleteTask}
+      />
 
       {/* Form Edit Modal */}
       <FormProcessoModal

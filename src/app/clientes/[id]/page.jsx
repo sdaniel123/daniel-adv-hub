@@ -21,7 +21,9 @@ import {
 } from 'lucide-react';
 import ToastNotification from '@/components/ui/ToastNotification';
 import FormClienteModal from '@/components/clientes/FormClienteModal';
-import { initialClientesData, mockProcessosData, mockTarefasData } from '@/lib/clientesStore';
+import DetalhesTarefaModal from '@/components/tarefas/DetalhesTarefaModal';
+import { initialClientesData, mockProcessosData } from '@/lib/clientesStore';
+import { getTarefasSalvas, salvarTarefas, formatarDataExibicao } from '@/lib/tarefasStore';
 
 export default function ClienteDetalhesPage() {
   const router = useRouter();
@@ -34,6 +36,28 @@ export default function ClienteDetalhesPage() {
   const [anotacoes, setAnotacoes] = useState('');
   const [salvandoNota, setSalvandoNota] = useState(false);
   const [toast, setToast] = useState(null);
+  const [todasTarefas, setTodasTarefas] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
+
+  useEffect(() => {
+    setTodasTarefas(getTarefasSalvas());
+  }, []);
+
+  const handleUpdateTask = (updated) => {
+    const newTarefas = todasTarefas.map(t => t.id === updated.id ? updated : t);
+    setTodasTarefas(newTarefas);
+    salvarTarefas(newTarefas);
+    setSelectedTask(updated);
+    setToast('Tarefa atualizada!');
+  };
+
+  const handleDeleteTask = (taskId) => {
+    const newTarefas = todasTarefas.filter(t => t.id !== taskId);
+    setTodasTarefas(newTarefas);
+    salvarTarefas(newTarefas);
+    setSelectedTask(null);
+    setToast('Tarefa excluída!');
+  };
 
   useEffect(() => {
     // Load client from store or initial data
@@ -64,7 +88,7 @@ export default function ClienteDetalhesPage() {
   }
 
   const processosDoCliente = mockProcessosData.filter((p) => p.clienteId === cliente.id || p.cliente === cliente.nome);
-  const tarefasDoCliente = mockTarefasData.filter((t) => t.clienteId === cliente.id || t.cliente === cliente.nome);
+  const tarefasDoCliente = todasTarefas.filter((t) => t.clienteId === cliente.id || t.cliente === cliente.nome);
 
   const handlePrintPDF = () => {
     window.print();
@@ -337,16 +361,29 @@ export default function ClienteDetalhesPage() {
                 Nenhuma tarefa vinculada a este cliente.
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {tarefasDoCliente.map((t) => (
-                  <div key={t.id} style={{ backgroundColor: '#0E1526', border: '1px solid #1B263B', borderRadius: '8px', padding: '14px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '0.9rem' }}>{t.titulo}</span>
-                      {t.urgencia && <span className="badge-saas badge-danger">Urgente</span>}
+                  <div
+                    key={t.id}
+                    onClick={() => setSelectedTask(t)}
+                    style={{
+                      backgroundColor: '#0E1526',
+                      border: '1px solid #1B263B',
+                      borderRadius: '8px',
+                      padding: '12px 14px',
+                      cursor: 'pointer',
+                      transition: 'border-color 0.15s ease'
+                    }}
+                    className="kanban-card-hover"
+                  >
+                    <div style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '0.88rem', marginBottom: '6px' }}>
+                      {t.tipo || t.titulo}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', fontSize: '0.78rem', color: '#64748B' }}>
-                      <span>Vencimento: {t.vencimento}</span>
-                      <span className="badge-saas badge-primary">{t.status}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.78rem', color: '#94A3B8' }}>
+                      <span>Prazo: {formatarDataExibicao(t.prazo || t.vencimento)}</span>
+                      <span className={`badge-saas ${t.status === 'Concluída' || t.status === 'Arquivada' ? 'badge-success' : 'badge-primary'}`}>
+                        {t.status}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -355,6 +392,15 @@ export default function ClienteDetalhesPage() {
           </div>
         </div>
       </div>
+
+      {/* Popup Detalhes da Tarefa ao clicar */}
+      <DetalhesTarefaModal
+        isOpen={!!selectedTask}
+        onClose={() => setSelectedTask(null)}
+        task={selectedTask}
+        onUpdateTask={handleUpdateTask}
+        onDeleteTask={handleDeleteTask}
+      />
 
       {/* Edit Modal (Popup with Blurred Background) */}
       <FormClienteModal

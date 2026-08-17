@@ -20,6 +20,8 @@ import {
   Clock,
   Save
 } from 'lucide-react';
+import DetalhesTarefaModal from '@/components/tarefas/DetalhesTarefaModal';
+import { formatarDataExibicao } from '@/lib/tarefasStore';
 
 export default function FichaClienteModal({ 
   isOpen, 
@@ -36,6 +38,7 @@ export default function FichaClienteModal({
   const [anotacoes, setAnotacoes] = useState(cliente.anotacoes || '');
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [salvandoNota, setSalvandoNota] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   // Filter linked processes and tasks
   const processosDoCliente = mockProcessos.filter((p) => p.clienteId === cliente.id || p.cliente === cliente.nome);
@@ -298,14 +301,27 @@ export default function FichaClienteModal({
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {tarefasDoCliente.map((t) => (
-                  <div key={t.id} style={{ backgroundColor: '#0E1526', border: '1px solid #1B263B', borderRadius: '8px', padding: '12px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '0.85rem' }}>{t.titulo}</span>
-                      {t.urgencia && <span className="badge-saas badge-danger">Urgente</span>}
+                  <div
+                    key={t.id}
+                    onClick={() => setSelectedTask(t)}
+                    style={{
+                      backgroundColor: '#0E1526',
+                      border: '1px solid #1B263B',
+                      borderRadius: '8px',
+                      padding: '12px',
+                      cursor: 'pointer',
+                      transition: 'border-color 0.15s ease'
+                    }}
+                    className="kanban-card-hover"
+                  >
+                    <div style={{ fontWeight: 700, color: '#FFFFFF', fontSize: '0.86rem', marginBottom: '4px' }}>
+                      {t.tipo || t.titulo}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px', fontSize: '0.75rem', color: '#64748B' }}>
-                      <span>Vencimento: {t.vencimento}</span>
-                      <span className="badge-saas badge-primary">{t.status}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.76rem', color: '#94A3B8' }}>
+                      <span>Prazo: {formatarDataExibicao(t.prazo || t.vencimento)}</span>
+                      <span className={`badge-saas ${t.status === 'Concluída' || t.status === 'Arquivada' ? 'badge-success' : 'badge-primary'}`}>
+                        {t.status}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -340,6 +356,15 @@ export default function FichaClienteModal({
             </div>
           </div>
         )}
+
+        {/* Modal Popup Detalhes da Tarefa ao Clicar */}
+        <DetalhesTarefaModal
+          isOpen={!!selectedTask}
+          onClose={() => setSelectedTask(null)}
+          task={selectedTask}
+          onUpdateTask={(updated) => setSelectedTask(updated)}
+          onDeleteTask={() => setSelectedTask(null)}
+        />
       </div>
     </div>
   );
