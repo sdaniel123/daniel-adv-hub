@@ -1,130 +1,168 @@
-// Central data store for initial clients, processes and tasks
+import { supabase } from './supabaseClient';
 
-export const initialClientesData = [
-  { 
-    id: '1', 
-    nome: 'Carlos Eduardo Silva', 
-    tipo: 'Pessoa Física', 
-    documento: '123.456.789-00', 
-    rg: '12.345.678-9', 
-    profissao: 'Engenheiro Civil',
-    nacionalidade: 'Brasileiro(a)',
-    cep: '01001-000',
-    logradouro: 'Praça da Sé',
-    numero: '100',
-    complemento: 'Apto 42',
-    bairro: 'Sé',
-    cidade: 'São Paulo',
-    uf: 'SP',
-    email: 'carlos.silva@email.com', 
-    fone: '(11) 98765-4321', 
-    processosCount: 2, 
-    prioritario: true, 
-    chaveAtiva: true, 
-    comProcesso: true, 
-    cadastradoEsteMes: true,
-    incapacidade: 'Capaz',
-    anotacoes: 'Cliente preferencial. Solicita contato sempre via WhatsApp no período da tarde.',
-    dataCadastro: '10/08/2026'
-  },
-  { 
-    id: '2', 
-    nome: 'Tech Solutions Ltda', 
-    tipo: 'Pessoa Jurídica', 
-    documento: '12.345.678/0001-90', 
-    rg: 'ISENTO', 
-    profissao: 'Tecnologia da Informação',
-    nacionalidade: 'Brasileiro(a)',
-    cep: '13010-000',
-    logradouro: 'Avenida Francisco Glicério',
-    numero: '1500',
-    complemento: 'Bloco B',
-    bairro: 'Centro',
-    cidade: 'Campinas',
-    uf: 'SP',
-    respEmpresaNome: 'Roberto Alencar',
-    respEmpresaCpf: '321.654.987-11',
-    respEmpresaEndereco: 'Av. Brasil, 450 - Campinas/SP',
-    email: 'contato@techsolutions.com', 
-    fone: '(11) 3344-5566', 
-    processosCount: 5, 
-    prioritario: false, 
-    chaveAtiva: true, 
-    comProcesso: true, 
-    cadastradoEsteMes: false,
-    incapacidade: 'Capaz',
-    anotacoes: 'Empresa do ramo de software. Contrato de assessoria jurídica mensal.',
-    dataCadastro: '01/07/2026'
-  },
-  { 
-    id: '3', 
-    nome: 'Maria Fernanda Oliveira', 
-    tipo: 'Pessoa Física', 
-    documento: '987.654.321-11', 
-    rg: '98.765.432-1', 
-    profissao: 'Médica Veterinária',
-    nacionalidade: 'Brasileiro(a)',
-    cep: '22041-001',
-    logradouro: 'Avenida Atlântica',
-    numero: '2000',
-    complemento: '',
-    bairro: 'Copacabana',
-    cidade: 'Rio de Janeiro',
-    uf: 'RJ',
-    email: 'mf.oliveira@email.com', 
-    fone: '(21) 99887-7665', 
-    processosCount: 1, 
-    prioritario: true, 
-    chaveAtiva: true, 
-    comProcesso: true, 
-    cadastradoEsteMes: true,
-    incapacidade: 'Capaz',
-    anotacoes: 'Ação indenizatória contra cia aérea.',
-    dataCadastro: '14/08/2026'
-  },
-  { 
-    id: '4', 
-    nome: 'Lucas Mendes (Menor Impúbere)', 
-    tipo: 'Pessoa Física', 
-    documento: '456.789.123-44', 
-    rg: '45.678.912-3', 
-    profissao: 'Estudante',
-    nacionalidade: 'Brasileiro(a)',
-    cep: '04530-000',
-    logradouro: 'Rua Juscelino Kubitschek',
-    numero: '500',
-    complemento: '',
-    bairro: 'Itaim Bibi',
-    cidade: 'São Paulo',
-    uf: 'SP',
-    incapacidade: 'Menor Impúbere',
-    respLegalNome: 'Ana Paula Mendes (Mãe)',
-    respLegalCpf: '111.222.333-44',
-    respLegalRg: '11.222.333-4',
-    respLegalProfissao: 'Arquiteta',
-    respLegalNacionalidade: 'Brasileiro(a)',
-    respLegalEndereco: 'Rua Juscelino Kubitschek, 500 - Itaim Bibi - São Paulo/SP',
-    email: 'anapaula.mendes@email.com', 
-    fone: '(11) 97766-5544', 
-    processosCount: 0, 
-    prioritario: false, 
-    chaveAtiva: false, 
-    comProcesso: false, 
-    cadastradoEsteMes: true,
-    anotacoes: 'Representado por sua genitora Ana Paula Mendes para ação de alimentos.',
-    dataCadastro: '15/08/2026'
-  },
-];
+// Helper to map DB row (snake_case) to Frontend camelCase object
+export function mapClienteDbToFrontend(dbRow) {
+  if (!dbRow) return null;
+  return {
+    id: dbRow.id,
+    nome: dbRow.nome || '',
+    tipo: dbRow.tipo || 'Pessoa Física',
+    documento: dbRow.documento || '',
+    rg: dbRow.rg || '',
+    profissao: dbRow.profissao || '',
+    nacionalidade: dbRow.nacionalidade || 'Brasileiro(a)',
+    cep: dbRow.cep || '',
+    logradouro: dbRow.logradouro || '',
+    numero: dbRow.numero || '',
+    complemento: dbRow.complemento || '',
+    bairro: dbRow.bairro || '',
+    cidade: dbRow.cidade || '',
+    uf: dbRow.uf || '',
+    email: dbRow.email || '',
+    fone: dbRow.fone || '',
+    processosCount: dbRow.processosCount || 0,
+    prioritario: Boolean(dbRow.prioritario),
+    chaveAtiva: Boolean(dbRow.chave_ativa),
+    comProcesso: Boolean(dbRow.com_processo),
+    cadastradoEsteMes: Boolean(dbRow.cadastrado_este_mes),
+    incapacidade: dbRow.incapacidade || 'Capaz',
+    respEmpresaNome: dbRow.resp_empresa_nome || '',
+    respEmpresaCpf: dbRow.resp_empresa_cpf || '',
+    respEmpresaEndereco: dbRow.resp_empresa_endereco || '',
+    respLegalNome: dbRow.resp_legal_nome || '',
+    respLegalCpf: dbRow.resp_legal_cpf || '',
+    respLegalRg: dbRow.resp_legal_rg || '',
+    respLegalProfissao: dbRow.resp_legal_profissao || '',
+    respLegalNacionalidade: dbRow.resp_legal_nacionalidade || '',
+    respLegalEndereco: dbRow.resp_legal_endereco || '',
+    anotacoes: dbRow.anotacoes || '',
+    dataCadastro: dbRow.created_at ? new Date(dbRow.created_at).toLocaleDateString('pt-BR') : ''
+  };
+}
 
-export const mockProcessosData = [
-  { id: 'p1', cnj: '0001234-56.2026.8.26.0100', clienteId: '1', cliente: 'Carlos Eduardo Silva', assunto: 'Ação de Cobrança c/c Indenização', vara: '2ª Vara Cível - Foro Central', status: 'Em andamento' },
-  { id: 'p2', cnj: '0005544-11.2025.8.26.0100', clienteId: '1', cliente: 'Carlos Eduardo Silva', assunto: 'Execução de Título Extrajudicial', vara: '4ª Vara Cível', status: 'Em andamento' },
-  { id: 'p3', cnj: '0098765-43.2025.8.26.0000', clienteId: '2', cliente: 'Tech Solutions Ltda', assunto: 'Recurso de Apelação Cível', vara: '3ª Câmara de Direito Privado', status: 'Em andamento' },
-  { id: 'p4', cnj: '0004321-12.2024.8.16.0014', clienteId: '3', cliente: 'Maria Fernanda Oliveira', assunto: 'Revisão Contratual Bancária', vara: '1ª Vara Cível de Londrina', status: 'Concluído' },
-];
+// Helper to map Frontend camelCase to DB snake_case object
+export function mapClienteFrontendToDb(data) {
+  return {
+    nome: data.nome,
+    tipo: data.tipo || 'Pessoa Física',
+    documento: data.documento || null,
+    rg: data.rg || null,
+    profissao: data.profissao || null,
+    nacionalidade: data.nacionalidade || 'Brasileiro(a)',
+    cep: data.cep || null,
+    logradouro: data.logradouro || null,
+    numero: data.numero || null,
+    complemento: data.complemento || null,
+    bairro: data.bairro || null,
+    cidade: data.cidade || null,
+    uf: data.uf || null,
+    email: data.email || null,
+    fone: data.fone || null,
+    prioritario: Boolean(data.prioritario),
+    chave_ativa: data.chaveAtiva !== undefined ? Boolean(data.chaveAtiva) : true,
+    com_processo: Boolean(data.comProcesso),
+    cadastrado_este_mes: data.cadastradoEsteMes !== undefined ? Boolean(data.cadastradoEsteMes) : true,
+    incapacidade: data.incapacidade || 'Capaz',
+    resp_empresa_nome: data.respEmpresaNome || null,
+    resp_empresa_cpf: data.respEmpresaCpf || null,
+    resp_empresa_endereco: data.respEmpresaEndereco || null,
+    resp_legal_nome: data.respLegalNome || null,
+    resp_legal_cpf: data.respLegalCpf || null,
+    resp_legal_rg: data.respLegalRg || null,
+    resp_legal_profissao: data.respLegalProfissao || null,
+    resp_legal_nacionalidade: data.respLegalNacionalidade || null,
+    resp_legal_endereco: data.respLegalEndereco || null,
+    anotacoes: data.anotacoes || null
+  };
+}
 
-export const mockTarefasData = [
-  { id: 't1', titulo: 'Elaborar Réplica à Contestação', clienteId: '1', cliente: 'Carlos Eduardo Silva', vencimento: '18/08/2026', urgencia: true, status: 'Pendente' },
-  { id: 't2', titulo: 'Juntar Procuração e Guias', clienteId: '2', cliente: 'Tech Solutions Ltda', vencimento: '20/08/2026', urgencia: false, status: 'Pendente' },
-  { id: 't3', titulo: 'Conferir Depósito Judicial', clienteId: '3', cliente: 'Maria Fernanda Oliveira', vencimento: '15/08/2026', urgencia: false, status: 'Concluída' },
-];
+// Store API
+export async function fetchClientes() {
+  try {
+    const { data, error } = await supabase
+      .from('clientes')
+      .select('*')
+      .order('nome', { ascending: true });
+
+    if (error) {
+      console.error('Erro ao buscar clientes no Supabase:', error);
+      return [];
+    }
+    return (data || []).map(mapClienteDbToFrontend);
+  } catch (err) {
+    console.error('Falha de conexão com Supabase:', err);
+    return [];
+  }
+}
+
+export async function fetchClienteById(id) {
+  try {
+    const { data, error } = await supabase
+      .from('clientes')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Erro ao buscar cliente por ID:', error);
+      return null;
+    }
+    return mapClienteDbToFrontend(data);
+  } catch (err) {
+    console.error('Falha ao buscar cliente:', err);
+    return null;
+  }
+}
+
+export async function createCliente(clienteData) {
+  try {
+    const dbPayload = mapClienteFrontendToDb(clienteData);
+    const { data, error } = await supabase
+      .from('clientes')
+      .insert([dbPayload])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return mapClienteDbToFrontend(data);
+  } catch (err) {
+    console.error('Erro ao criar cliente no Supabase:', err);
+    throw err;
+  }
+}
+
+export async function updateCliente(id, clienteData) {
+  try {
+    const dbPayload = mapClienteFrontendToDb(clienteData);
+    const { data, error } = await supabase
+      .from('clientes')
+      .update(dbPayload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return mapClienteDbToFrontend(data);
+  } catch (err) {
+    console.error('Erro ao atualizar cliente:', err);
+    throw err;
+  }
+}
+
+export async function deleteCliente(id) {
+  try {
+    const { error } = await supabase
+      .from('clientes')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Erro ao deletar cliente:', err);
+    throw err;
+  }
+}
+
+// Fallback vazio sem mocks
+export const initialClientesData = [];

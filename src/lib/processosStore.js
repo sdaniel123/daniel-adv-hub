@@ -1,115 +1,191 @@
-// Store for Processos and Andamentos
+import { supabase } from './supabaseClient';
 
-export const initialProcessosData = [
-  { 
-    id: '1', 
-    cnj: '0001234-56.2026.8.26.0100', 
-    clientes: [
-      { id: '1', nome: 'Carlos Eduardo Silva' }
-    ], 
-    dataProtocolo: '2026-08-10', // YYYY-MM-DD para ordenação precisa
-    dataProtocoloFmt: '10/08/2026',
-    tramitacao: '2ª Vara Cível - Comarca de São Paulo/SP',
-    sistema: 'PJe', 
-    assunto: 'Ação de Cobrança c/c Indenização por Danos Morais', 
-    valorCausa: 'R$ 45.000,00',
-    prioritario: true, 
-    status: 'Em andamento', // 'Em andamento' | 'Com audiência' | 'Encerrado' | 'Arquivado'
-    comAudiencia: true, 
-    encerado: false, 
-    arquivado: false,
-    
-    // Dados completos da Parte Contrária
-    parteContrariaNome: 'Banco Financeiro S.A.',
-    parteContrariaDoc: '00.111.222/0001-33',
-    parteContrariaProfissao: 'Instituição Financeira',
-    parteContrariaNacionalidade: 'Brasileiro(a)',
-    parteContrariaCep: '01310-100',
-    parteContrariaLogradouro: 'Avenida Paulista',
-    parteContrariaNumero: '1000',
-    parteContrariaBairro: 'Bela Vista',
-    parteContrariaCidade: 'São Paulo',
-    parteContrariaUf: 'SP',
+export function mapProcessoDbToFrontend(dbRow) {
+  if (!dbRow) return null;
+  return {
+    id: dbRow.id,
+    cnj: dbRow.cnj || '',
+    clienteId: dbRow.cliente_id || '',
+    clientes: dbRow.clientes ? [{ id: dbRow.clientes.id, nome: dbRow.clientes.nome }] : [],
+    dataProtocolo: dbRow.data_protocolo || '',
+    dataProtocoloFmt: dbRow.data_protocolo ? new Date(dbRow.data_protocolo + 'T00:00:00').toLocaleDateString('pt-BR') : '',
+    tramitacao: dbRow.tramitacao || '',
+    sistema: dbRow.sistema || '',
+    assunto: dbRow.assunto || '',
+    valorCausa: dbRow.valor_causa || '',
+    prioritario: Boolean(dbRow.prioritario),
+    status: dbRow.status || 'Em andamento',
+    comAudiencia: Boolean(dbRow.com_audiencia),
+    encerado: Boolean(dbRow.encerrado),
+    arquivado: Boolean(dbRow.arquivado),
+    parteContrariaNome: dbRow.parte_contraria_nome || '',
+    parteContrariaDoc: dbRow.parte_contraria_doc || '',
+    parteContrariaProfissao: dbRow.parte_contraria_profissao || '',
+    parteContrariaNacionalidade: dbRow.parte_contraria_nacionalidade || 'Brasileiro(a)',
+    parteContrariaCep: dbRow.parte_contraria_cep || '',
+    parteContrariaLogradouro: dbRow.parte_contraria_logradouro || '',
+    parteContrariaNumero: dbRow.parte_contraria_numero || '',
+    parteContrariaBairro: dbRow.parte_contraria_bairro || '',
+    parteContrariaCidade: dbRow.parte_contraria_cidade || '',
+    parteContrariaUf: dbRow.parte_contraria_uf || '',
+    anotacoes: dbRow.anotacoes || '',
+    dataCadastro: dbRow.created_at ? new Date(dbRow.created_at).toLocaleDateString('pt-BR') : '',
+    andamentos: (dbRow.andamentos || []).map((a) => ({
+      id: a.id,
+      data: a.data ? new Date(a.data + 'T00:00:00').toLocaleDateString('pt-BR') : '',
+      descricao: a.descricao
+    }))
+  };
+}
 
-    anotacoes: 'Audiência de conciliação designada para a próxima semana. Aguardando contestação.',
-    dataCadastro: '10/08/2026',
+export function mapProcessoFrontendToDb(data) {
+  return {
+    cnj: data.cnj,
+    cliente_id: data.clienteId || (data.clientes && data.clientes[0] ? data.clientes[0].id : null),
+    data_protocolo: data.dataProtocolo || null,
+    tramitacao: data.tramitacao || null,
+    sistema: data.sistema || null,
+    assunto: data.assunto || null,
+    valor_causa: data.valorCausa || null,
+    prioritario: Boolean(data.prioritario),
+    status: data.status || 'Em andamento',
+    com_audiencia: Boolean(data.comAudiencia),
+    encerrado: Boolean(data.encerado),
+    arquivado: Boolean(data.arquivado),
+    parte_contraria_nome: data.parteContrariaNome || null,
+    parte_contraria_doc: data.parteContrariaDoc || null,
+    parte_contraria_profissao: data.parteContrariaProfissao || null,
+    parte_contraria_nacionalidade: data.parteContrariaNacionalidade || 'Brasileiro(a)',
+    parte_contraria_cep: data.parteContrariaCep || null,
+    parte_contraria_logradouro: data.parteContrariaLogradouro || null,
+    parte_contraria_numero: data.parteContrariaNumero || null,
+    parte_contraria_bairro: data.parteContrariaBairro || null,
+    parte_contraria_cidade: data.parteContrariaCidade || null,
+    parte_contraria_uf: data.parteContrariaUf || null,
+    anotacoes: data.anotacoes || null
+  };
+}
 
-    // Andamentos Processuais
-    andamentos: [
-      { id: 'a1', data: '12/08/2026', descricao: 'Juntada de petição de especificação de provas pelo autor.' },
-      { id: 'a2', data: '10/08/2026', descricao: 'Distribuição realizada com sucesso no sistema PJe.' }
-    ]
-  },
-  { 
-    id: '2', 
-    cnj: '0098765-43.2025.8.26.0000', 
-    clientes: [
-      { id: '2', nome: 'Tech Solutions Ltda' }
-    ], 
-    dataProtocolo: '2025-11-20',
-    dataProtocoloFmt: '20/11/2025',
-    tramitacao: '3ª Câmara de Direito Privado - TJSP',
-    sistema: 'EProc', 
-    assunto: 'Recurso de Apelação Cível em Contrato de Prestação de Serviços', 
-    valorCausa: 'R$ 120.000,00',
-    prioritario: false, 
-    status: 'Em andamento', 
-    comAudiencia: false, 
-    encerado: false, 
-    arquivado: false,
+export async function fetchProcessos() {
+  try {
+    const { data, error } = await supabase
+      .from('processos')
+      .select('*, clientes(id, nome), andamentos(*)')
+      .order('created_at', { ascending: false });
 
-    parteContrariaNome: 'Mega Distribuidora de Eletrônicos Ltda',
-    parteContrariaDoc: '99.888.777/0001-66',
-    parteContrariaProfissao: 'Comércio Atacadista',
-    parteContrariaNacionalidade: 'Brasileiro(a)',
-    parteContrariaCep: '13020-000',
-    parteContrariaLogradouro: 'Rua Barão de Jaguara',
-    parteContrariaNumero: '850',
-    parteContrariaBairro: 'Centro',
-    parteContrariaCidade: 'Campinas',
-    parteContrariaUf: 'SP',
+    if (error) {
+      console.error('Erro ao buscar processos no Supabase:', error);
+      return [];
+    }
 
-    anotacoes: 'Autos remetidos ao Desembargador Relator para elaboração do voto.',
-    dataCadastro: '20/11/2025',
+    return (data || []).map(mapProcessoDbToFrontend);
+  } catch (err) {
+    console.error('Falha de conexão com Supabase:', err);
+    return [];
+  }
+}
 
-    andamentos: [
-      { id: 'a3', data: '05/01/2026', descricao: 'Conclusos ao Relator para parecer e julgamento.' }
-    ]
-  },
-  { 
-    id: '3', 
-    cnj: '0004321-12.2024.8.16.0014', 
-    clientes: [
-      { id: '3', nome: 'Maria Fernanda Oliveira' }
-    ], 
-    dataProtocolo: '2024-05-15',
-    dataProtocoloFmt: '15/05/2024',
-    tramitacao: '1ª Vara Cível - Comarca de Londrina/PR',
-    sistema: 'Projudi', 
-    assunto: 'Ação de Revisão Contratual Bancária', 
-    valorCausa: 'R$ 35.000,00',
-    prioritario: true, 
-    status: 'Arquivado', 
-    comAudiencia: false, 
-    encerado: true, 
-    arquivado: true,
+export async function fetchProcessoById(id) {
+  try {
+    const { data, error } = await supabase
+      .from('processos')
+      .select('*, clientes(id, nome), andamentos(*)')
+      .eq('id', id)
+      .single();
 
-    parteContrariaNome: 'Banco Crédito Rápido S.A.',
-    parteContrariaDoc: '11.222.333/0001-44',
-    parteContrariaProfissao: 'Instituição Financeira',
-    parteContrariaNacionalidade: 'Brasileiro(a)',
-    parteContrariaCep: '86010-000',
-    parteContrariaLogradouro: 'Rua Sergipe',
-    parteContrariaNumero: '300',
-    parteContrariaBairro: 'Centro',
-    parteContrariaCidade: 'Londrina',
-    parteContrariaUf: 'PR',
+    if (error) {
+      console.error('Erro ao buscar processo por ID:', error);
+      return null;
+    }
 
-    anotacoes: 'Processo arquivado definitivamente após trânsito em julgado e pagamento de custas.',
-    dataCadastro: '15/05/2024',
+    return mapProcessoDbToFrontend(data);
+  } catch (err) {
+    console.error('Falha ao buscar processo:', err);
+    return null;
+  }
+}
 
-    andamentos: [
-      { id: 'a4', data: '10/06/2025', descricao: 'Arquivamento definitivo dos autos.' }
-    ]
-  },
-];
+export async function createProcesso(processoData) {
+  try {
+    const dbPayload = mapProcessoFrontendToDb(processoData);
+    const { data, error } = await supabase
+      .from('processos')
+      .insert([dbPayload])
+      .select('*, clientes(id, nome)')
+      .single();
+
+    if (error) throw error;
+
+    // Se houver um andamento inicial no cadastro
+    if (processoData.andamentos && processoData.andamentos.length > 0) {
+      const firstAndamento = processoData.andamentos[0];
+      await supabase.from('andamentos').insert([{
+        processo_id: data.id,
+        data: new Date().toISOString().slice(0, 10),
+        descricao: firstAndamento.descricao || 'Cadastro inicial do processo no sistema.'
+      }]);
+    }
+
+    return fetchProcessoById(data.id);
+  } catch (err) {
+    console.error('Erro ao criar processo no Supabase:', err);
+    throw err;
+  }
+}
+
+export async function updateProcesso(id, processoData) {
+  try {
+    const dbPayload = mapProcessoFrontendToDb(processoData);
+    const { data, error } = await supabase
+      .from('processos')
+      .update(dbPayload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return fetchProcessoById(data.id);
+  } catch (err) {
+    console.error('Erro ao atualizar processo:', err);
+    throw err;
+  }
+}
+
+export async function addAndamento(processoId, descricao, dataStr) {
+  try {
+    const dateFormatted = dataStr || new Date().toISOString().slice(0, 10);
+    const { data, error } = await supabase
+      .from('andamentos')
+      .insert([{
+        processo_id: processoId,
+        data: dateFormatted,
+        descricao: descricao
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('Erro ao adicionar andamento:', err);
+    throw err;
+  }
+}
+
+export async function deleteProcesso(id) {
+  try {
+    const { error } = await supabase
+      .from('processos')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Erro ao deletar processo:', err);
+    throw err;
+  }
+}
+
+// Fallback vazio sem dados mock
+export const initialProcessosData = [];

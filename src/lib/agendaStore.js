@@ -1,67 +1,146 @@
-// Central store and helpers for Audiências and Atendimentos
+import { supabase } from './supabaseClient';
 
-export const initialAudiencias = [
-  {
-    id: 'aud-1',
-    dataHora: '2026-08-18T10:00',
-    processoId: '1',
-    processo: '0001234-56.2026.8.26.0100',
-    cliente: 'Carlos Eduardo Silva',
-    tipo: 'Presencial',
-    local: '2ª Vara Cível - Foro Central de São Paulo/SP (Sala 204)',
-    status: 'Agendada', // 'Agendada' | 'Realizada' | 'Não realizada' | 'Reagendada'
-    anotacoes: 'Audiência de conciliação. Levar proposta de acordo aprovada pelo cliente.'
-  },
-  {
-    id: 'aud-2',
-    dataHora: '2026-08-20T14:30',
-    processoId: '2',
-    processo: '0098765-43.2025.8.26.0000',
-    cliente: 'Tech Solutions Ltda',
-    tipo: 'Online',
-    local: 'https://teams.microsoft.com/l/meetup-join/audiencia-tjsp-123',
-    status: 'Agendada',
-    anotacoes: 'Sustentação oral no Agravo de Instrumento perante a 3ª Câmara Cível.'
-  },
-  {
-    id: 'aud-3',
-    dataHora: '2026-08-25T11:00',
-    processoId: '3',
-    processo: '0004321-12.2024.8.16.0014',
-    cliente: 'Maria Fernanda Oliveira',
-    tipo: 'Presencial',
-    local: '1ª Vara Cível de Londrina/PR - Fórum Central',
-    status: 'Realizada',
-    anotacoes: 'Audiência de instrução finalizada. Processo concluso para sentença.'
-  }
-];
+export async function fetchAudiencias() {
+  try {
+    const { data, error } = await supabase
+      .from('audiencias')
+      .select('*, processos(cnj), clientes(nome)')
+      .order('data_hora', { ascending: true });
 
-export const initialAtendimentos = [
-  {
-    id: 'atend-1',
-    nomeAtendido: 'Carlos Eduardo Silva',
-    dataHora: '2026-08-18T16:00',
-    telefone: '(11) 98765-4321',
-    descricao: 'Reunião de alinhamento pré-audiência e esclarecimento de dúvidas sobre a réplica.',
-    status: 'Agendado' // 'Agendado' | 'Realizado' | 'Não realizado' | 'Reagendado'
-  },
-  {
-    id: 'atend-2',
-    nomeAtendido: 'Roberto Alencar (Tech Solutions)',
-    dataHora: '2026-08-19T11:00',
-    telefone: '(11) 3344-5566',
-    descricao: 'Consulta jurídica sobre revisão contratual de fornecedores internacionais.',
-    status: 'Agendado'
-  },
-  {
-    id: 'atend-3',
-    nomeAtendido: 'Ana Paula Mendes',
-    dataHora: '2026-08-21T09:30',
-    telefone: '(11) 97766-5544',
-    descricao: 'Atendimento inicial para ação de alimentos em favor do menor Lucas Mendes.',
-    status: 'Agendado'
+    if (error) {
+      console.error('Erro ao buscar audiências no Supabase:', error);
+      return [];
+    }
+
+    return (data || []).map((db) => ({
+      id: db.id,
+      dataHora: db.data_hora ? db.data_hora.slice(0, 16) : '',
+      processoId: db.processo_id || '',
+      processo: db.processos ? db.processos.cnj : '',
+      clienteId: db.cliente_id || '',
+      cliente: db.clientes ? db.clientes.nome : '',
+      tipo: db.tipo || 'Presencial',
+      local: db.local || '',
+      status: db.status || 'Agendada',
+      anotacoes: db.anotacoes || ''
+    }));
+  } catch (err) {
+    console.error('Falha de conexão com Supabase:', err);
+    return [];
   }
-];
+}
+
+export async function createAudiencia(payload) {
+  try {
+    const dbData = {
+      data_hora: payload.dataHora,
+      processo_id: payload.processoId || null,
+      cliente_id: payload.clienteId || null,
+      tipo: payload.tipo || 'Presencial',
+      local: payload.local || null,
+      status: payload.status || 'Agendada',
+      anotacoes: payload.anotacoes || null
+    };
+
+    const { data, error } = await supabase
+      .from('audiencias')
+      .insert([dbData])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('Erro ao salvar audiência:', err);
+    throw err;
+  }
+}
+
+export async function updateAudienciaStatus(id, status) {
+  try {
+    const { error } = await supabase
+      .from('audiencias')
+      .update({ status })
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Erro ao atualizar status da audiência:', err);
+    throw err;
+  }
+}
+
+export async function fetchAtendimentos() {
+  try {
+    const { data, error } = await supabase
+      .from('atendimentos')
+      .select('*, clientes(nome)')
+      .order('data_hora', { ascending: true });
+
+    if (error) {
+      console.error('Erro ao buscar atendimentos no Supabase:', error);
+      return [];
+    }
+
+    return (data || []).map((db) => ({
+      id: db.id,
+      nomeAtendido: db.nome_atendido || (db.clientes ? db.clientes.nome : ''),
+      clienteId: db.cliente_id || '',
+      dataHora: db.data_hora ? db.data_hora.slice(0, 16) : '',
+      telefone: db.telefone || '',
+      descricao: db.descricao || '',
+      status: db.status || 'Agendado'
+    }));
+  } catch (err) {
+    console.error('Falha de conexão com Supabase:', err);
+    return [];
+  }
+}
+
+export async function createAtendimento(payload) {
+  try {
+    const dbData = {
+      cliente_id: payload.clienteId || null,
+      nome_atendido: payload.nomeAtendido,
+      data_hora: payload.dataHora,
+      telefone: payload.telefone || null,
+      descricao: payload.descricao || null,
+      status: payload.status || 'Agendado'
+    };
+
+    const { data, error } = await supabase
+      .from('atendimentos')
+      .insert([dbData])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('Erro ao salvar atendimento:', err);
+    throw err;
+  }
+}
+
+export async function updateAtendimentoStatus(id, status) {
+  try {
+    const { error } = await supabase
+      .from('atendimentos')
+      .update({ status })
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Erro ao atualizar status do atendimento:', err);
+    throw err;
+  }
+}
+
+// Fallback arrays vazios
+export const initialAudiencias = [];
+export const initialAtendimentos = [];
 
 const DIAS_SEMANA = [
   'Domingo',
@@ -88,7 +167,6 @@ const MESES = [
   'Dezembro'
 ];
 
-// Helper: Formatar data/hora ISO (ex: 2026-08-18T10:00) para '18/08/2026 às 10:00'
 export function formatarDataHoraExibicao(isoStr) {
   if (!isoStr) return '-';
   const d = new Date(isoStr);
@@ -103,7 +181,6 @@ export function formatarDataHoraExibicao(isoStr) {
   return `${dia}/${mes}/${ano} às ${hora}:${minuto}`;
 }
 
-// Helper: Formatar apenas a hora (ex: 10:00)
 export function formatarHoraExibicao(isoStr) {
   if (!isoStr) return '-';
   const d = new Date(isoStr);
@@ -114,7 +191,6 @@ export function formatarHoraExibicao(isoStr) {
   return `${hora}:${minuto}`;
 }
 
-// Helper: Formatar cabeçalho por dia (ex: Segunda-feira, 18 de Agosto de 2026)
 export function formatarCabecalhoDia(dateObjOrStr) {
   const d = typeof dateObjOrStr === 'string' ? new Date(dateObjOrStr) : dateObjOrStr;
   if (!d || isNaN(d.getTime())) return 'Data não especificada';
@@ -127,16 +203,13 @@ export function formatarCabecalhoDia(dateObjOrStr) {
   return `${diaSemana}, ${diaMes} de ${mesNome} de ${ano}`;
 }
 
-// Helper: Agrupar lista de compromissos por dia da semana (ordenados do mais perto ao mais longe)
 export function agruparPorDiaSemana(itens) {
-  // 1. Ordenar itens por dataHora cronologicamente
   const ordenados = [...itens].sort((a, b) => {
     const dataA = new Date(a.dataHora).getTime();
     const dataB = new Date(b.dataHora).getTime();
     return dataA - dataB;
   });
 
-  // 2. Agrupar por data (YYYY-MM-DD)
   const gruposMap = new Map();
 
   ordenados.forEach((item) => {
@@ -159,7 +232,6 @@ export function agruparPorDiaSemana(itens) {
   return Array.from(gruposMap.values());
 }
 
-// Helper: Filtrar compromissos por período
 export function filtrarPorPeriodo(itens, periodo, dataInicioCustom = '', dataFimCustom = '') {
   if (!periodo || periodo === 'todos') return itens;
 
@@ -177,7 +249,7 @@ export function filtrarPorPeriodo(itens, periodo, dataInicioCustom = '', dataFim
     }
 
     if (periodo === 'semana') {
-      const diaSemana = hoje.getDay(); // 0 (Dom) a 6 (Sáb)
+      const diaSemana = hoje.getDay();
       const inicioSemana = new Date(hoje);
       inicioSemana.setDate(hoje.getDate() - diaSemana);
       const fimSemana = new Date(inicioSemana);
@@ -207,48 +279,4 @@ export function filtrarPorPeriodo(itens, periodo, dataInicioCustom = '', dataFim
 
     return true;
   });
-}
-
-// LocalStorage Persistence
-const STORAGE_KEY_AUDIENCIAS = 'daniel_adv_audiencias_v1';
-const STORAGE_KEY_ATENDIMENTOS = 'daniel_adv_atendimentos_v1';
-
-export function getAudienciasSalvas() {
-  if (typeof window === 'undefined') return initialAudiencias;
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY_AUDIENCIAS);
-    if (saved) return JSON.parse(saved);
-  } catch (e) {
-    console.error('Erro ao ler audiências salvas:', e);
-  }
-  return initialAudiencias;
-}
-
-export function salvarAudiencias(lista) {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(STORAGE_KEY_AUDIENCIAS, JSON.stringify(lista));
-  } catch (e) {
-    console.error('Erro ao salvar audiências:', e);
-  }
-}
-
-export function getAtendimentosSalvos() {
-  if (typeof window === 'undefined') return initialAtendimentos;
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY_ATENDIMENTOS);
-    if (saved) return JSON.parse(saved);
-  } catch (e) {
-    console.error('Erro ao ler atendimentos salvos:', e);
-  }
-  return initialAtendimentos;
-}
-
-export function salvarAtendimentos(lista) {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(STORAGE_KEY_ATENDIMENTOS, JSON.stringify(lista));
-  } catch (e) {
-    console.error('Erro ao salvar atendimentos:', e);
-  }
 }

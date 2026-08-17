@@ -24,8 +24,8 @@ import {
 import ToastNotification from '@/components/ui/ToastNotification';
 import FormProcessoModal from '@/components/processos/FormProcessoModal';
 import DetalhesTarefaModal from '@/components/tarefas/DetalhesTarefaModal';
-import { initialProcessosData } from '@/lib/processosStore';
-import { getTarefasSalvas, salvarTarefas, formatarDataExibicao } from '@/lib/tarefasStore';
+import { fetchProcessoById, updateProcesso, deleteProcesso, addAndamento } from '@/lib/processosStore';
+import { fetchTarefas, formatarDataExibicao } from '@/lib/tarefasStore';
 
 export default function ProcessoDetalhesPage() {
   const router = useRouter();
@@ -33,6 +33,7 @@ export default function ProcessoDetalhesPage() {
   const processoId = params?.id;
 
   const [processo, setProcesso] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   
@@ -49,8 +50,21 @@ export default function ProcessoDetalhesPage() {
   const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => {
-    setTodasTarefas(getTarefasSalvas());
-  }, []);
+    async function loadData() {
+      if (!processoId) return;
+      setLoading(true);
+      const proc = await fetchProcessoById(processoId);
+      setProcesso(proc);
+      if (proc) {
+        setAnotacoes(proc.anotacoes || '');
+        setAndamentos(proc.andamentos || []);
+      }
+      const tar = await fetchTarefas();
+      setTodasTarefas(tar);
+      setLoading(false);
+    }
+    loadData();
+  }, [processoId]);
 
   const handleUpdateTask = (updated) => {
     const newTarefas = todasTarefas.map(t => t.id === updated.id ? updated : t);

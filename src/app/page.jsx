@@ -19,6 +19,9 @@ import {
   X
 } from 'lucide-react';
 import ToastNotification from '@/components/ui/ToastNotification';
+import { fetchClientes } from '@/lib/clientesStore';
+import { fetchProcessos } from '@/lib/processosStore';
+import { fetchFinanceiroLancamentos } from '@/lib/financeiroStore';
 
 export default function HomePage() {
   const [toastMessage, setToastMessage] = useState(null);
@@ -26,12 +29,38 @@ export default function HomePage() {
   const [modalInput, setModalInput] = useState('');
   const [formattedDate, setFormattedDate] = useState('');
 
+  // Dynamic Dashboard Stats
+  const [totalClientes, setTotalClientes] = useState(0);
+  const [totalProcessos, setTotalProcessos] = useState(0);
+  const [totalCaixa, setTotalCaixa] = useState(0);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, '0');
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const year = now.getFullYear();
     setFormattedDate(`${day}/${month}/${year}`);
+
+    async function loadDashboardMetrics() {
+      setLoading(true);
+      const [cliData, procData, finData] = await Promise.all([
+        fetchClientes(),
+        fetchProcessos(),
+        fetchFinanceiroLancamentos()
+      ]);
+      setTotalClientes(cliData.length);
+      setTotalProcessos(procData.length);
+
+      const receitas = finData
+        .filter((item) => item.tipo === 'Receita')
+        .reduce((sum, item) => sum + (item.valor || 0), 0);
+      setTotalCaixa(receitas);
+
+      setLoading(false);
+    }
+
+    loadDashboardMetrics();
   }, []);
 
   const handleOpenModal = (type) => {
@@ -66,9 +95,9 @@ export default function HomePage() {
             <div>
               <span style={{ fontSize: '0.85rem', color: '#94A3B8', fontWeight: 500 }}>Total de Clientes</span>
               <div style={{ fontSize: '2.2rem', fontWeight: 800, color: '#FFFFFF', marginTop: '6px', fontFamily: 'var(--font-sans)' }}>
-                154
+                {loading ? '...' : totalClientes}
               </div>
-              <p style={{ fontSize: '0.78rem', color: '#64748B', marginTop: '4px' }}>Clientes cadastrados no sistema</p>
+              <p style={{ fontSize: '0.78rem', color: '#64748B', marginTop: '4px' }}>Clientes cadastrados no banco</p>
             </div>
             <div style={{ padding: '10px', borderRadius: '10px', backgroundColor: '#131D33', color: '#94A3B8' }}>
               <Users size={22} />
@@ -82,7 +111,7 @@ export default function HomePage() {
             <div>
               <span style={{ fontSize: '0.85rem', color: '#94A3B8', fontWeight: 500 }}>Total de Processos</span>
               <div style={{ fontSize: '2.2rem', fontWeight: 800, color: '#FFFFFF', marginTop: '6px', fontFamily: 'var(--font-sans)' }}>
-                48
+                {loading ? '...' : totalProcessos}
               </div>
               <p style={{ fontSize: '0.78rem', color: '#64748B', marginTop: '4px' }}>Processos e ações ativas</p>
             </div>
@@ -92,15 +121,15 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Card 3: Caixa do Mês (Requested modification) */}
+        {/* Card 3: Caixa do Mês */}
         <div className="card-saas">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
             <div>
-              <span style={{ fontSize: '0.85rem', color: '#94A3B8', fontWeight: 500 }}>Caixa do Mês</span>
+              <span style={{ fontSize: '0.85rem', color: '#94A3B8', fontWeight: 500 }}>Caixa (Receitas)</span>
               <div style={{ fontSize: '2.2rem', fontWeight: 800, color: '#F59E0B', marginTop: '6px', fontFamily: 'var(--font-sans)' }}>
-                R$ 42.850
+                {loading ? '...' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalCaixa)}
               </div>
-              <p style={{ fontSize: '0.78rem', color: '#64748B', marginTop: '4px' }}>Faturamento e honorários deste mês</p>
+              <p style={{ fontSize: '0.78rem', color: '#64748B', marginTop: '4px' }}>Entradas de honorários registradas</p>
             </div>
             <div style={{ padding: '10px', borderRadius: '10px', backgroundColor: '#131D33', color: '#F59E0B' }}>
               <DollarSign size={22} />

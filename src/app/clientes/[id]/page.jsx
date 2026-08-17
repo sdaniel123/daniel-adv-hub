@@ -22,8 +22,8 @@ import {
 import ToastNotification from '@/components/ui/ToastNotification';
 import FormClienteModal from '@/components/clientes/FormClienteModal';
 import DetalhesTarefaModal from '@/components/tarefas/DetalhesTarefaModal';
-import { initialClientesData, mockProcessosData } from '@/lib/clientesStore';
-import { getTarefasSalvas, salvarTarefas, formatarDataExibicao } from '@/lib/tarefasStore';
+import { fetchClienteById, updateCliente, deleteCliente } from '@/lib/clientesStore';
+import { fetchTarefas, formatarDataExibicao } from '@/lib/tarefasStore';
 
 export default function ClienteDetalhesPage() {
   const router = useRouter();
@@ -31,6 +31,7 @@ export default function ClienteDetalhesPage() {
   const clienteId = params?.id;
 
   const [cliente, setCliente] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [anotacoes, setAnotacoes] = useState('');
@@ -40,8 +41,18 @@ export default function ClienteDetalhesPage() {
   const [selectedTask, setSelectedTask] = useState(null);
 
   useEffect(() => {
-    setTodasTarefas(getTarefasSalvas());
-  }, []);
+    async function loadData() {
+      if (!clienteId) return;
+      setLoading(true);
+      const cli = await fetchClienteById(clienteId);
+      setCliente(cli);
+      if (cli) setAnotacoes(cli.anotacoes || '');
+      const tar = await fetchTarefas();
+      setTodasTarefas(tar);
+      setLoading(false);
+    }
+    loadData();
+  }, [clienteId]);
 
   const handleUpdateTask = (updated) => {
     const newTarefas = todasTarefas.map(t => t.id === updated.id ? updated : t);

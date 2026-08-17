@@ -1,72 +1,121 @@
-// Central store and helpers for Tasks (Tarefas e Prazos) and Task Types (Tipos de Tarefas)
+import { supabase } from './supabaseClient';
 
-export const initialTiposTarefas = [
-  { id: 'tipo-1', nome: 'Elaborar Petição / Réplica' },
-  { id: 'tipo-2', nome: 'Protocolar Recurso / Agravo' },
-  { id: 'tipo-3', nome: 'Juntar Procuração / Guias' },
-  { id: 'tipo-4', nome: 'Solicitar Guia de Custas' },
-  { id: 'tipo-5', nome: 'Audiência de Conciliação / Instrução' },
-  { id: 'tipo-6', nome: 'Contestar Ação Judicial' },
-  { id: 'tipo-7', nome: 'Atendimento ao Cliente / Reunião' },
-  { id: 'tipo-8', nome: 'Conferir Depósito Judicial' }
-];
+export async function fetchTarefas() {
+  try {
+    const { data, error } = await supabase
+      .from('tarefas')
+      .select('*, processos(cnj), clientes(nome)')
+      .order('prazo', { ascending: true });
 
-export const initialTarefasData = [
-  {
-    id: 't-1',
-    tipo: 'Elaborar Petição / Réplica',
-    prazo: '2026-08-18', // YYYY-MM-DD para alta precisão
-    processoId: '1',
-    processo: '0001234-56.2026.8.26.0100',
-    clienteId: '1',
-    cliente: 'Carlos Eduardo Silva',
-    anotacoes: 'Analisar preliminares de contestação apresentadas pelo réu e juntar documentos comprobatórios.',
-    urgente: true,
-    status: 'Pendente', // 'Pendente' | 'Em andamento' | 'Concluída' | 'Arquivada'
-    dataCriacao: '2026-08-10'
-  },
-  {
-    id: 't-2',
-    tipo: 'Protocolar Recurso / Agravo',
-    prazo: '2026-08-17',
-    processoId: '2',
-    processo: '0098765-43.2025.8.26.0000',
-    clienteId: '2',
-    cliente: 'Tech Solutions Ltda',
-    anotacoes: 'Protocolar agravo de instrumento contra decisão interlocutória que indeferiu a tutela de urgência.',
-    urgente: true,
-    status: 'Em andamento',
-    dataCriacao: '2026-08-11'
-  },
-  {
-    id: 't-3',
-    tipo: 'Solicitar Guia de Custas',
-    prazo: '2026-08-22',
-    processoId: '3',
-    processo: '0004321-12.2024.8.16.0014',
-    clienteId: '3',
-    cliente: 'Maria Fernanda Oliveira',
-    anotacoes: 'Emitir guia de custas finais no portal do TJPR e encaminhar ao cliente para pagamento.',
-    urgente: false,
-    status: 'Pendente',
-    dataCriacao: '2026-08-12'
-  },
-  {
-    id: 't-4',
-    tipo: 'Juntar Procuração / Guias',
-    prazo: '2026-08-12',
-    processoId: '1',
-    processo: '0001234-56.2026.8.26.0100',
-    clienteId: '1',
-    cliente: 'Carlos Eduardo Silva',
-    anotacoes: 'Procuração com poderes específicos juntada com sucesso nos autos.',
-    urgente: false,
-    status: 'Concluída',
-    dataCriacao: '2026-08-08'
+    if (error) {
+      console.error('Erro ao buscar tarefas no Supabase:', error);
+      return [];
+    }
+
+    return (data || []).map((db) => ({
+      id: db.id,
+      tipo: db.tipo || 'Pendente',
+      prazo: db.prazo || '',
+      processoId: db.processo_id || '',
+      processo: db.processos ? db.processos.cnj : '',
+      clienteId: db.cliente_id || '',
+      cliente: db.clientes ? db.clientes.nome : '',
+      anotacoes: db.anotacoes || '',
+      urgente: Boolean(db.urgente),
+      status: db.status || 'Pendente',
+      dataCriacao: db.created_at ? db.created_at.slice(0, 10) : ''
+    }));
+  } catch (err) {
+    console.error('Falha de conexão com Supabase:', err);
+    return [];
   }
-];
+}
 
-// Helper: Converter strings de data (YYYY-MM-DD ou DD/MM/YYYY) para objeto Date
+export async function createTarefa(payload) {
+  try {
+    const dbData = {
+      tipo: payload.tipo,
+      prazo: payload.prazo,
+      processo_id: payload.processoId || null,
+      cliente_id: payload.clienteId || null,
+      anotacoes: payload.anotacoes || null,
+      urgente: Boolean(payload.urgente),
+      status: payload.status || 'Pendente'
+    };
+
+    const { data, error } = await supabase
+      .from('tarefas')
+      .insert([dbData])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('Erro ao criar tarefa no Supabase:', err);
+    throw err;
+  }
+}
+
+export async function updateTarefaStatus(id, status) {
+  try {
+    const { error } = await supabase
+      .from('tarefas')
+      .update({ status })
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Erro ao atualizar status da tarefa:', err);
+    throw err;
+  }
+}
+
+export async function deleteTarefa(id) {
+  try {
+    const { error } = await supabase
+      .from('tarefas')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Erro ao deletar tarefa:', err);
+    throw err;
+  }
+}
+
+export async function fetchTiposTarefas() {
+  try {
+    const { data, error } = await supabase
+      .from('tipos_tarefas')
+      .select('*')
+      .order('nome', { ascending: true });
+
+    if (error) {
+      console.error('Erro ao buscar tipos de tarefas:', error);
+      return defaultTiposTarefas;
+    }
+    if (!data || data.length === 0) return defaultTiposTarefas;
+    return data;
+  } catch (err) {
+    return defaultTiposTarefas;
+  }
+}
+
+export function getTiposTarefasSalvos() {
+  return defaultTiposTarefas;
+}
+
+export function salvarTiposTarefas(list) {
+  return list;
+}
+
+export const initialTarefasData = [];
+export const initialTiposTarefas = defaultTiposTarefas;
+
 export function parseDate(dateStr) {
   if (!dateStr) return new Date();
   if (dateStr.includes('/')) {
@@ -79,7 +128,6 @@ export function parseDate(dateStr) {
   return new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
 }
 
-// Helper: Formatar data para exibição PT-BR (DD/MM/AAAA)
 export function formatarDataExibicao(dateStr) {
   if (!dateStr) return '-';
   if (dateStr.includes('/')) return dateStr;
@@ -90,7 +138,6 @@ export function formatarDataExibicao(dateStr) {
   return `${dia}/${mes}/${ano}`;
 }
 
-// Helper: Calcular status do prazo (Ex: Vence em X dias / Vencida há X dias)
 export function calcularStatusPrazo(prazoStr, status) {
   if (status === 'Concluída' || status === 'Arquivada') {
     return {
@@ -142,61 +189,14 @@ export function calcularStatusPrazo(prazoStr, status) {
   }
 }
 
-// Helper: Ordenar tarefas por vencimento (mais perto para mais longe) e urgência
 export function ordenarTarefas(tarefas) {
   return [...tarefas].sort((a, b) => {
-    // 1º Crivo: Urgência (urgentes primeiro)
     if (a.urgente && !b.urgente) return -1;
     if (!a.urgente && b.urgente) return 1;
 
-    // 2º Crivo: Data de Vencimento (mais recente/próximo primeiro)
     const dataA = parseDate(a.prazo).getTime();
     const dataB = parseDate(b.prazo).getTime();
 
     return dataA - dataB;
   });
-}
-
-// Persistência em LocalStorage (com fallback)
-const STORAGE_KEY_TAREFAS = 'daniel_adv_tarefas_v1';
-const STORAGE_KEY_TIPOS = 'daniel_adv_tipos_tarefas_v1';
-
-export function getTarefasSalvas() {
-  if (typeof window === 'undefined') return initialTarefasData;
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY_TAREFAS);
-    if (saved) return JSON.parse(saved);
-  } catch (e) {
-    console.error('Erro ao ler tarefas salvas:', e);
-  }
-  return initialTarefasData;
-}
-
-export function salvarTarefas(tarefas) {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(STORAGE_KEY_TAREFAS, JSON.stringify(tarefas));
-  } catch (e) {
-    console.error('Erro ao salvar tarefas:', e);
-  }
-}
-
-export function getTiposTarefasSalvos() {
-  if (typeof window === 'undefined') return initialTiposTarefas;
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY_TIPOS);
-    if (saved) return JSON.parse(saved);
-  } catch (e) {
-    console.error('Erro ao ler tipos de tarefas:', e);
-  }
-  return initialTiposTarefas;
-}
-
-export function salvarTiposTarefas(tipos) {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(STORAGE_KEY_TIPOS, JSON.stringify(tipos));
-  } catch (e) {
-    console.error('Erro ao salvar tipos de tarefas:', e);
-  }
 }

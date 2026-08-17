@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -18,11 +18,12 @@ import {
 } from 'lucide-react';
 import ToastNotification from '@/components/ui/ToastNotification';
 import FormProcessoModal from '@/components/processos/FormProcessoModal';
-import { initialProcessosData } from '@/lib/processosStore';
+import { fetchProcessos, createProcesso, updateProcesso } from '@/lib/processosStore';
 
 export default function ProcessosPage() {
   const router = useRouter();
-  const [processos, setProcessos] = useState(initialProcessosData);
+  const [processos, setProcessos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('em_andamento'); // 'em_andamento' | 'com_audiencia' | 'encerrados' | 'arquivados'
   const [activeSystemFilter, setActiveSystemFilter] = useState('todos');
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,13 +33,22 @@ export default function ProcessosPage() {
   const [editingProcesso, setEditingProcesso] = useState(null);
   const [toast, setToast] = useState(null);
 
-  // Sorting: Most recent protocol date to oldest + Strict filtering
+  const loadData = async () => {
+    setLoading(true);
+    const data = await fetchProcessos();
+    setProcessos(data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   const filteredSortedProcessos = useMemo(() => {
     return processos
       .filter((proc) => {
         const term = searchTerm.toLowerCase().trim();
         
-        // Search by CNJ number or Client Name
         const clientNames = (proc.clientes || []).map(c => c.nome.toLowerCase()).join(' ');
         const matchesSearch = 
           !term ||
@@ -49,11 +59,9 @@ export default function ProcessosPage() {
 
         if (!matchesSearch) return false;
 
-        // Strict Arquivados Rule: Archived processes ONLY appear in 'arquivados' tab!
         if (activeTab === 'arquivados') {
           if (!proc.arquivado && proc.status !== 'Arquivado') return false;
         } else {
-          // If in any other tab (em_andamento, com_audiencia, encerrados), exclude archived!
           if (proc.arquivado || proc.status === 'Arquivado') return false;
 
           if (activeTab === 'em_andamento' && proc.status !== 'Em andamento') return false;
@@ -61,7 +69,6 @@ export default function ProcessosPage() {
           if (activeTab === 'encerrados' && !proc.encerado && proc.status !== 'Encerrado') return false;
         }
 
-        // Filter by System tag
         if (activeSystemFilter === 'pje' && proc.sistema !== 'PJe') return false;
         if (activeSystemFilter === 'projudi' && proc.sistema !== 'Projudi') return false;
         if (activeSystemFilter === 'eproc' && proc.sistema !== 'EProc') return false;
@@ -70,7 +77,6 @@ export default function ProcessosPage() {
         return true;
       })
       .sort((a, b) => {
-        // Order by protocol date descending (newest to oldest)
         const dateA = a.dataProtocolo || '1970-01-01';
         const dateB = b.dataProtocolo || '1970-01-01';
         return dateB.localeCompare(dateA);
@@ -82,27 +88,21 @@ export default function ProcessosPage() {
     setShowFormModal(true);
   };
 
-  const handleSaveProcesso = (formData) => {
-    const newId = formData.id || String(Date.now());
-    const newProcess = {
-      ...formData,
-      id: newId,
-      dataCadastro: new Date().toLocaleDateString('pt-BR'),
-      andamentos: formData.andamentos || [
-        { id: String(Date.now()), data: new Date().toLocaleDateString('pt-BR'), descricao: 'Cadastro inicial do processo no sistema.' }
-      ]
-    };
-
-    setProcessos((prev) => {
-      const exists = prev.some((p) => p.id === newId);
-      if (exists) {
-        return prev.map((p) => (p.id === newId ? newProcess : p));
+  const handleSaveProcesso = async (formData) => {
+    try {
+      if (formData.id) {
+        const updated = await updateProcesso(formData.id, formData);
+        setProcessos((prev) => prev.map((p) => (p.id === formData.id ? updated : p)));
+        setToast(`Processo CNJ "${formData.cnj}" atualizado!`);
+      } else {
+        const created = await createProcesso(formData);
+        setProcessos((prev) => [created, ...prev]);
+        setToast(`Processo CNJ "${formData.cnj}" criado no Supabase!`);
       }
-      return [newProcess, ...prev];
-    });
-
-    setToast(`Processo ${formData.cnj} salvo com sucesso!`);
-    setShowFormModal(false);
+      setShowFormModal(false);
+    } catch (err) {
+      setToast('Erro ao salvar processo no banco de dados.');
+    }
   };
 
   const handleExportCSV = () => {

@@ -23,8 +23,10 @@ import FormTarefaModal from '@/components/tarefas/FormTarefaModal';
 import DetalhesTarefaModal from '@/components/tarefas/DetalhesTarefaModal';
 import GestaoTiposModal from '@/components/tarefas/GestaoTiposModal';
 import { 
-  getTarefasSalvas, 
-  salvarTarefas, 
+  fetchTarefas, 
+  createTarefa, 
+  updateTarefaStatus, 
+  deleteTarefa, 
   ordenarTarefas, 
   calcularStatusPrazo, 
   formatarDataExibicao 
@@ -32,6 +34,7 @@ import {
 
 export default function TarefasPage() {
   const [tarefas, setTarefas] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('pendentes'); // 'pendentes' | 'todas' | 'urgentes' | 'arquivadas'
   const [viewMode, setViewMode] = useState('lista'); // 'lista' | 'kanban'
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,10 +48,15 @@ export default function TarefasPage() {
 
   const [toast, setToast] = useState(null);
 
-  // Carregar tarefas salvas
-  useEffect(() => {
-    const list = getTarefasSalvas();
+  const loadTarefasData = async () => {
+    setLoading(true);
+    const list = await fetchTarefas();
     setTarefas(ordenarTarefas(list));
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadTarefasData();
   }, []);
 
   const updateTarefasState = (newList) => {

@@ -23,10 +23,12 @@ import FormAudienciaModal from '@/components/agenda/FormAudienciaModal';
 import FormAtendimentoModal from '@/components/agenda/FormAtendimentoModal';
 import CalendarioCompleto from '@/components/agenda/CalendarioCompleto';
 import { 
-  getAudienciasSalvas, 
-  salvarAudiencias, 
-  getAtendimentosSalvos, 
-  salvarAtendimentos, 
+  fetchAudiencias, 
+  createAudiencia, 
+  updateAudienciaStatus, 
+  fetchAtendimentos, 
+  createAtendimento, 
+  updateAtendimentoStatus, 
   agruparPorDiaSemana, 
   filtrarPorPeriodo, 
   formatarDataHoraExibicao, 
@@ -42,6 +44,7 @@ export default function AgendaPage() {
   // Data states
   const [audiencias, setAudiencias] = useState([]);
   const [atendimentos, setAtendimentos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Modals state
   const [showAudienciaModal, setShowAudienciaModal] = useState(false);
@@ -55,10 +58,19 @@ export default function AgendaPage() {
 
   const [toast, setToast] = useState(null);
 
-  // Carregar dados salvos ao montar
+  const loadAgendaData = async () => {
+    setLoading(true);
+    const [auds, atends] = await Promise.all([
+      fetchAudiencias(),
+      fetchAtendimentos()
+    ]);
+    setAudiencias(auds);
+    setAtendimentos(atends);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    setAudiencias(getAudienciasSalvas());
-    setAtendimentos(getAtendimentosSalvos());
+    loadAgendaData();
   }, []);
 
   // Handlers para Audiências

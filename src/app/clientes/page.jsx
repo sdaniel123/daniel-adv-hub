@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -16,11 +16,12 @@ import {
 } from 'lucide-react';
 import ToastNotification from '@/components/ui/ToastNotification';
 import FormClienteModal from '@/components/clientes/FormClienteModal';
-import { initialClientesData } from '@/lib/clientesStore';
+import { fetchClientes, createCliente } from '@/lib/clientesStore';
 
 export default function ClientesPage() {
   const router = useRouter();
-  const [clientes, setClientes] = useState(initialClientesData);
+  const [clientes, setClientes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('todos');
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -28,7 +29,17 @@ export default function ClientesPage() {
   const [showFormModal, setShowFormModal] = useState(false);
   const [toast, setToast] = useState(null);
 
-  // Alphabetical sort (A-Z) and search filtering
+  const loadClientesData = async () => {
+    setLoading(true);
+    const data = await fetchClientes();
+    setClientes(data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    loadClientesData();
+  }, []);
+
   const filteredSortedClientes = useMemo(() => {
     return clientes
       .filter((cli) => {
@@ -55,22 +66,15 @@ export default function ClientesPage() {
     setShowFormModal(true);
   };
 
-  const handleSaveCliente = (formData) => {
-    const newId = String(Date.now());
-    const now = new Date();
-    const dateStr = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
-    const newClient = {
-      ...formData,
-      id: newId,
-      processosCount: 0,
-      comProcesso: false,
-      chaveAtiva: true,
-      cadastradoEsteMes: true,
-      dataCadastro: dateStr,
-    };
-    setClientes((prev) => [...prev, newClient]);
-    setToast(`Cliente "${formData.nome}" cadastrado com sucesso!`);
-    setShowFormModal(false);
+  const handleSaveCliente = async (formData) => {
+    try {
+      const created = await createCliente(formData);
+      setClientes((prev) => [...prev, created]);
+      setToast(`Cliente "${formData.nome}" cadastrado com sucesso no Supabase!`);
+      setShowFormModal(false);
+    } catch (err) {
+      setToast('Erro ao salvar cliente no banco de dados.');
+    }
   };
 
   const handleExportCSV = () => {
